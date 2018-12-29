@@ -3,10 +3,10 @@
 class Scene;
 class Persone;
 
-class ObjectManager
+class Level
 {
 public:
-    ObjectManager();
+    Level();
 
     void setScene(Scene* scene);
 

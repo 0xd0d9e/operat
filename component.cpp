@@ -1,6 +1,7 @@
 #include "component.h"
 
 #include "debug.h"
+#include "event.h"
 #include "resource_manager.h"
 
 Component::Component(Component* parent, const QString& name, const QVariantMap& properties)
@@ -16,6 +17,8 @@ Component::Component(Component* parent, const QString& name, const QVariantMap& 
 
 Component::~Component()
 {
+    Q_ASSERT(flags == NoGuardFlags);
+
     if (parent)
         parent->removeChild(this);
     clear();
@@ -133,12 +136,32 @@ bool Component::contains(const QRectF& sceneRect) const
 
 void Component::update(const double time)
 {
+    flags |= UpdateFlag;
+    const int elapsed = floor(1000 * time);
+    auto iter = events.begin();
+    while (iter != events.end())
+    {
+        Event* event = *iter;
+        if (event->prepare(elapsed))
+        {
+            iter = events.erase(iter);
+            delete event;
+        }
+        else
+        {
+            ++iter;
+        }
+    }
+
     for (Component* child : children)
         child->update(time);
+
+    flags ^= UpdateFlag;
 }
 
 void Component::paint(QPainter* painter, const QRectF& sceneRect)
 {
+    flags |= PaintFlag;
     painter->save();
     paintComponent(painter, sceneRect);
     for (Component* child : children)
@@ -146,6 +169,7 @@ void Component::paint(QPainter* painter, const QRectF& sceneRect)
         child->paint(painter, sceneRect);
     }
     painter->restore();
+    flags ^= PaintFlag;
 }
 
 void Component::dump(const int offset)
@@ -162,6 +186,11 @@ void Component::dump(const int offset)
             child->dump(offset + 2);
         }
     }
+}
+
+void Component::addEvent(Event* event)
+{
+    events.push_back(event);
 }
 
 void Component::paintComponent(QPainter* painter, const QRectF& sceneRect)

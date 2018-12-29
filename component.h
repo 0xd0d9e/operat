@@ -4,10 +4,19 @@
 #include <QString>
 #include <QVariantMap>
 
-#define DECLARE_PROPERTY(Type, name, Name) \
+#include <vector>
+#include <list>
+
+#define DECLARE_PROPERTY2(Type, name, Name, onChange) \
     static const char* name##Key() { return #name; } \
     Type get##Name() const { return properties[#name].value<Type>(); } \
-    void set##Name(const Type& value) { properties[#name] = QVariant::fromValue(value); }
+    void set##Name(const Type& value) { properties[#name] = QVariant::fromValue(value); on##Name##Changed(value); }
+
+#define DECLARE_PROPERTY(Type, name, Name) \
+    DECLARE_PROPERTY2(Type, name, Name, on##Name##Changed) \
+    void on##Name##Changed(const Type&) {}
+
+class Event;
 
 class Component
 {
@@ -56,6 +65,7 @@ public:
 
     void dump(const int offset = 0);
 
+    void addEvent(Event* event);
 protected:
     virtual void paintComponent(QPainter* painter, const QRectF& sceneRect);
     void applyPreset();
@@ -65,6 +75,13 @@ protected:
     QVariantMap properties;
 
 private:
+    enum GuardFlags
+    {
+        NoGuardFlags = 0,
+        UpdateFlag = 1,
+        PaintFlag = 2
+    };
+
     Component* parent = nullptr;
     QString name;
     QPointF pos;
@@ -72,6 +89,8 @@ private:
     double rotation = 0.0;
     double scale = 1.0;
     std::vector<Component*> children;
+    std::list<Event*> events;
+    int flags = NoGuardFlags;
 };
 
 

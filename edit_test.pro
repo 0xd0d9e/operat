@@ -24,13 +24,14 @@ SOURCES += \
     viewport_control.cpp \
     viewport_mouse_event.cpp \
     grid.cpp \
-    gridmetrics.cpp \
     persone.cpp \
     camera.cpp \
     label.cpp \
     sprite.cpp \
     resource_manager.cpp \
-    objectmanager.cpp
+    event.cpp \
+    grid_metrics.cpp \
+    level.cpp
 
 HEADERS += \
     component.h \
@@ -42,7 +43,6 @@ HEADERS += \
     viewport_control.h \
     viewport_mouse_event.h \
     grid.h \
-    gridmetrics.h \
     persone.h \
     config.h \
     debug.h \
@@ -51,7 +51,9 @@ HEADERS += \
     label.h \
     sprite.h \
     resource_manager.h \
-    objectmanager.h
+    event.h \
+    grid_metrics.h \
+    level.h
 
 RESOURCES += \
     resources.qrc

@@ -33,7 +33,7 @@ Viewport::Viewport(QWidget* parent) : QWidget(parent)
     TEST(viewportTest);
     connect(&timer, &QTimer::timeout, this, &Viewport::update);
 
-    //timer.start(Config::paintInterval);
+    timer.start(Config::paintInterval);
 
     setMouseTracking(true);
 

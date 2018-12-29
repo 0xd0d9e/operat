@@ -16,10 +16,10 @@ void Shape::paintComponent(QPainter* painter, const QRectF& sceneRect)
 {
     Component::paintComponent(painter, sceneRect);
 
-    painter->setPen(properties["pen"].value<QPen>());
-    painter->setBrush(properties["brush"].value<QBrush>());
+    painter->setPen(getPen());
+    painter->setBrush(getBrush());
 
-    switch (properties["type"].toInt())
+    switch (getType())
     {
     case Rectangle:
         painter->drawRect(getRect());
