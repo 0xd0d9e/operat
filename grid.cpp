@@ -1,11 +1,11 @@
 #include "grid.h"
 
 #include "debug.h"
-#include "gridmetrics.h"
+#include "grid_metrics.h"
 
 #include <QDebug>
 
-int getIndexSize(const int index)
+inline int getIndexSize(const int index)
 {
     if (index == 0)
         return 4;
@@ -16,16 +16,10 @@ int getIndexSize(const int index)
     return 0;
 }
 
-Grid::Grid(Component* parent, const QString& name, const QVariantMap& properties) : Shape(parent, name, properties)
-{
-
-}
-
 bool Grid::contains(const QRectF& sceneRect) const
 {
-    if (getRect().isNull())
-        return true;
-    return Shape::contains(sceneRect);
+    const QRectF rect = getRect();
+    return rect.isNull() || rect.intersects(sceneRect);
 }
 
 void Grid::paintComponent(QPainter* painter, const QRectF& sceneRect)
@@ -34,9 +28,6 @@ void Grid::paintComponent(QPainter* painter, const QRectF& sceneRect)
     const QRectF targetRect = rect.isNull()
             ? sceneRect
             : rect.intersected(sceneRect);
-
-    Shape::paintComponent(painter, sceneRect);
-
 
     const GridMetrics metrics(getSize());
     const int leftIndex = metrics.floor(targetRect.x());

@@ -1,17 +1,21 @@
 #pragma once
 
+#include <QRectF>
+
 class Scene;
 class Persone;
 
 class Level
 {
 public:
-    Level();
+    Level(const double tileSize);
 
-    void setScene(Scene* scene);
+    Scene* getScene() const;
 
     void addPersone(Persone* persone);
 
 private:
+    double tileSize;
     Scene* scene = nullptr;
+    QRectF rect;
 };

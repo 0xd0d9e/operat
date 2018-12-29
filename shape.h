@@ -1,6 +1,7 @@
 #pragma once
 
 #include "component.h"
+#include "style.h"
 
 class Shape : public Component
 {
@@ -14,8 +15,7 @@ public:
 
     Shape(Component* parent = nullptr, const QString& name = QString(), const QVariantMap& properties = QVariantMap());
 
-    DECLARE_PROPERTY(QPen, pen, Pen)
-    DECLARE_PROPERTY(QBrush, brush, Brush)
+    DECLARE_PROPERTY(Style, style, Style)
     DECLARE_PROPERTY(int, type, Type)
     DECLARE_PROPERTY(QRectF, rect, Rect)
 

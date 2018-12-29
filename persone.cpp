@@ -13,7 +13,7 @@ Persone::Persone(Component* parent, const QString& name, const QVariantMap& prop
     lhand->setPos({0.25, 0.25});
     rhand->setPos({0.25,-0.25});
 
-    addEvent(new Event([this](){nextDir();}, Event::Regular, 1000, -5000));
+    //addEvent(new Event([this](){rotate();}, Event::Regular, 0, -1000));
 }
 
 void Persone::update(const double time)
@@ -21,38 +21,10 @@ void Persone::update(const double time)
     Component::update(time);
 }
 
-void Persone::onDirChanged(const int dir)
+void Persone::rotate()
 {
-    switch (dir)
-    {
-
-    case Left:
-        lhand->setPos({-0.25, 0.25});
-        rhand->setPos({-0.25,-0.25});
-        break;
-
-    case Right:
-        lhand->setPos({ 0.25, 0.25});
-        rhand->setPos({ 0.25,-0.25});
-        break;
-
-    case Top:
-        lhand->setPos({-0.25,-0.25});
-        rhand->setPos({ 0.25,-0.25});
-        break;
-
-    case Down:
-        lhand->setPos({ 0.25, 0.25});
-        rhand->setPos({-0.25, 0.25});
-        break;
-
-    }
-}
-
-void Persone::nextDir()
-{
-    int dir = getDir();
-    if (++dir > Down)
-        dir = Left;
-    setDir(dir);
+    const double rotation = getRotation() + M_PI / (180.0*2);
+    setRotation(rotation);
+    const double speed = 30.0 / 50;
+    setPos(getPos() + QPointF(cos(rotation), sin(rotation)) * speed);
 }

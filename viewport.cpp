@@ -37,7 +37,11 @@ Viewport::Viewport(QWidget* parent) : QWidget(parent)
 
     setMouseTracking(true);
 
-    overlay->create<Label>("debugLabel");
+    overlay->create<Label>("debugLabel", {{"color", QColor(Qt::red)},
+                                          {"font", QFont("Monospace", 16)},
+                                          {"type", Shape::Rectangle},
+                                          {"style", Style(QBrush("#aaaaffaa"))},
+                                          {"margin", 5.0}});
 }
 
 Component* Viewport::getOverlay() const
@@ -167,7 +171,7 @@ QPointF Viewport::viewportToScene(const QPointF& viewportPos) const
 
 double Viewport::getScale() const
 {
-    return std::max(width() / viewRect.width(), height() / viewRect.height());
+    return std::min(width() / viewRect.width(), height() / viewRect.height());
 }
 
 void Viewport::update()
@@ -200,22 +204,24 @@ void Viewport::updateBuffer()
 
     QPainter painter(&frameBuffer);
 
-    if (overlay)
-        overlay->paint(&painter, {0.0, 0.0, (double) width(), (double) height()});
-
     if (scene)
     {
         const QRectF sceneRect = inverseTransform.mapRect(QRectF(0, 0, width(), height()));
+        painter.save();
         painter.setTransform(transform);
         scene->paint(&painter, sceneRect);
+        painter.restore();
     }
 
     QStringList lines;
     lines << QString("Scale %1x%2").arg(viewRect.width() / width()).arg(viewRect.height() / height());
     lines << QString("Center x:%1, y:%2")
-             .arg(viewRect.center().x())
-             .arg(viewRect.center().y());
-    overlay->get<Label>("debugLabel")->setText(lines);
+             .arg(viewRect.center().x(), 0, 'f', 1)
+             .arg(viewRect.center().y(), 0, 'f', 1);
+    //overlay->get<Label>("debugLabel")->setText(lines.join("\n"));
+
+    if (overlay)
+        overlay->paint(&painter, {0.0, 0.0, (double) width(), (double) height()});
 }
 
 void Viewport::updateViewRect()
@@ -223,12 +229,16 @@ void Viewport::updateViewRect()
     const double scale = getScale();
 
     transform = QTransform();
+    transform.translate(width() / 2.0, height() / 2.0);
     transform.scale(scale, scale);
+    transform.translate(-viewRect.width() / 2.0, -viewRect.height() / 2.0);
     transform.translate(-viewRect.x(), -viewRect.y());
 
     inverseTransform = QTransform();
     inverseTransform.translate(viewRect.x(), viewRect.y());
+    inverseTransform.translate(-viewRect.width() / 2.0, -viewRect.height() / 2.0);
     inverseTransform.scale(1.0/scale, 1.0/scale);
+    inverseTransform.translate(width() / 2.0, height() / 2.0);
     update();
 }
 

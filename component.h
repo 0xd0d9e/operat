@@ -1,5 +1,7 @@
 #pragma once
 
+#include "default_value.h"
+
 #include <QPainter>
 #include <QString>
 #include <QVariantMap>
@@ -7,14 +9,24 @@
 #include <vector>
 #include <list>
 
-#define DECLARE_PROPERTY2(Type, name, Name, onChange) \
+#define DECLARE_PROPERTY_CD(Type, name, Name, onChange, byDefault) \
     static const char* name##Key() { return #name; } \
-    Type get##Name() const { return properties[#name].value<Type>(); } \
-    void set##Name(const Type& value) { properties[#name] = QVariant::fromValue(value); on##Name##Changed(value); }
+    Type get##Name(const Type& defaultValue = byDefault) const { return properties.value(#name, QVariant::fromValue(defaultValue)).value< Type >(); } \
+    void set##Name(const Type& value) { properties[#name] = QVariant::fromValue(value); onChange(value); }
+
+#define DECLARE_PROPERTY_D(Type, name, Name, byDefault) \
+    DECLARE_PROPERTY_CD(Type, name, Name, on##Name##Changed, byDefault) \
+    void on##Name##Changed(const Type&) {}
+
+#define DECLARE_PROPERTY_C(Type, name, Name, onChange) \
+    DECLARE_PROPERTY_CD(Type, name, Name, onChange, defaultValue<Type>())
 
 #define DECLARE_PROPERTY(Type, name, Name) \
-    DECLARE_PROPERTY2(Type, name, Name, on##Name##Changed) \
+    DECLARE_PROPERTY_C(Type, name, Name, on##Name##Changed) \
     void on##Name##Changed(const Type&) {}
+
+#define DECLARE_CONSTRUCTOR(Type, Super) \
+    Type(Component* parent = nullptr, const QString& name = QString(), const QVariantMap& properties = QVariantMap()) : Super(parent, name, properties) {}
 
 class Event;
 
@@ -27,17 +39,16 @@ public:
     Component* getParent() const;
     void setParent(Component* component);
 
-    QString getName() const;
-    void setName(const QString& value);
+    template <typename Type>
+    void onChanged(const Type&) {}
+
+    DECLARE_PROPERTY(QString, name, Name)
+    DECLARE_PROPERTY(QPointF, pos, Pos)
+    DECLARE_PROPERTY(double, scale, Scale)
+    DECLARE_PROPERTY(double, rotation, Rotation)
 
     QVariantMap getProperties() const;
     void setProperties(const QVariantMap& properties);
-
-    QPointF getPos() const;
-    void setPos(const QPointF& pos);
-
-    double getScale() const;
-    void setScale(const double scale);
 
     void addChild(Component* child);
     void removeChild(Component* child);
@@ -55,6 +66,8 @@ public:
     template <typename Type>
     Type* get(const QString& name);
 
+    size_t getChildCount() const;
+
     template <typename Function>
     void forEach(Function function);
     template <typename BeginFunction, typename EndFunction>
@@ -63,9 +76,15 @@ public:
     template <typename Type>
     Type* create(const QString& name = QString(), const QVariantMap& properties = QVariantMap());
 
-    void dump(const int offset = 0);
+    void dump(const int offset = 0) const;
 
     void addEvent(Event* event);
+
+    QPointF localToParent(const QPointF& localPos) const;
+    QRectF localToParent(const QRectF& localRect) const;
+
+    QPointF localToGlobal(const QPointF& localPos) const;
+    QRectF localToGlobal(const QRectF& localRect) const;
 protected:
     virtual void paintComponent(QPainter* painter, const QRectF& sceneRect);
     void applyPreset();
@@ -83,11 +102,6 @@ private:
     };
 
     Component* parent = nullptr;
-    QString name;
-    QPointF pos;
-    /// in radians
-    double rotation = 0.0;
-    double scale = 1.0;
     std::vector<Component*> children;
     std::list<Event*> events;
     int flags = NoGuardFlags;

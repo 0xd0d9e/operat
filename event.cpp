@@ -11,17 +11,15 @@ Event::Event(Function timeout, const Type type, const int duration, const int sp
 
 bool Event::prepare(const int elapsed)
 {
-    if (duration == 0)
-    {
-        timeout();
-        return type == Single;
-    }
-
     spent += elapsed;
     if (spent >= duration)
     {
         timeout();
-        spent -= duration;
+
+        if (duration == 0)
+            spent = 0;
+        else
+            spent -= duration;
         return type == Single;
     }
     return false;

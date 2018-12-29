@@ -12,8 +12,9 @@ class Shape;
 class ViewportControl : public ViewportListener, public Component
 {
 public:
-    ViewportControl(Viewport* viewport);
     ~ViewportControl();
+
+    void setViewport(Viewport* viewport);
 
 private:
     void mousePress(const ViewportMouseEvent& event) final;
@@ -32,7 +33,7 @@ private:
     QRectF pressRect;
     Shape* moveRect = nullptr;
     QSet<int> keys;
-    double speed = 50.0;
+    double speed = 100.0;
     int zoomDuration = 100;
     int viewDuration = 1000;
 };

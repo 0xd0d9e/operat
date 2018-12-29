@@ -7,14 +7,19 @@
 #include "viewport.h"
 #include "viewport_mouse_event.h"
 
-ViewportControl::ViewportControl(Viewport* viewport) : viewport(viewport)
-{
-    viewport->addListener(this);
-}
-
 ViewportControl::~ViewportControl()
 {
-    viewport->removeListener(this);
+    if (viewport)
+        viewport->removeListener(this);
+}
+
+void ViewportControl::setViewport(Viewport* newViewport)
+{
+    if (viewport)
+        viewport->removeListener(this);
+    viewport = newViewport;
+    if (viewport)
+        viewport->addListener(this);
 }
 
 void ViewportControl::mousePress(const ViewportMouseEvent& event)
@@ -23,19 +28,7 @@ void ViewportControl::mousePress(const ViewportMouseEvent& event)
     {
         moveRect = viewport->getScene()->getRoot()->create<Shape>("moveRect",
         {
-            {"pen", QPen(Qt::green, 2)},
-            {"brush", QBrush(QColor("#aa00aa00"))},
-            {"rect", QRectF()},
-            {"type", Shape::Rectangle}
-        });
-        pressPos = event.getScenePos();
-    }
-    else if (event.getButtons() == Qt::LeftButton)
-    {
-        moveRect = viewport->getScene()->getRoot()->create<Shape>("moveRect",
-        {
-            {"pen", QPen(Qt::green, 2)},
-            {"brush", QBrush(QColor("#aa00aa00"))},
+            {"style", Style(QPen(Qt::green, 2), QBrush(QColor("#aa00aa00")))},
             {"rect", QRectF()},
             {"type", Shape::Rectangle}
         });
@@ -146,7 +139,6 @@ void ViewportControl::update(const double time)
 
     if (!vec.isNull())
     {
-        DEBUG_LOCATION();
         const QPointF offset = vec * speed / viewport->getScale() * time;
         viewport->moveBy(offset);
     }

@@ -1,6 +1,8 @@
 #include "preview.h"
 
 #include <QApplication>
+#include <QVariant>
+
 
 int main(int argc, char *argv[])
 {

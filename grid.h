@@ -1,13 +1,17 @@
 #pragma once
 
-#include "shape.h"
+#include "component.h"
 
-class Grid : public Shape
+#include <QPen>
+
+class Grid : public Component
 {
 public:
-    Grid(Component* parent = nullptr, const QString& name = QString(), const QVariantMap& properties = QVariantMap());
+    DECLARE_CONSTRUCTOR(Grid, Component)
 
     DECLARE_PROPERTY(double, size, Size)
+    DECLARE_PROPERTY(QPen, pen, Pen)
+    DECLARE_PROPERTY(QRectF, rect, Rect)
 
     bool contains(const QRectF &sceneRect) const final;
 

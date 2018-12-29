@@ -31,7 +31,13 @@ SOURCES += \
     resource_manager.cpp \
     event.cpp \
     grid_metrics.cpp \
-    level.cpp
+    level.cpp \
+    stage.cpp \
+    stage_manager.cpp \
+    menu_button.cpp \
+    main_menu_stage.cpp \
+    style.cpp \
+    preview_stage.cpp
 
 HEADERS += \
     component.h \
@@ -53,7 +59,15 @@ HEADERS += \
     resource_manager.h \
     event.h \
     grid_metrics.h \
-    level.h
+    level.h \
+    stage.h \
+    stage_manager.h \
+    menu_button.h \
+    main_menu_stage.h \
+    style.h \
+    button_function.h \
+    default_value.h \
+    preview_stage.h
 
 RESOURCES += \
     resources.qrc

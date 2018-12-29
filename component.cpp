@@ -6,8 +6,14 @@
 
 Component::Component(Component* parent, const QString& name, const QVariantMap& properties)
     : properties(properties)
-    , name(name)
 {
+    if (!properties.contains(scaleKey()))
+        setScale(1.0);
+    if (!properties.contains(rotationKey()))
+        setRotation(0.0);
+
+    if (!name.isEmpty())
+        setName(name);
     if (!properties.empty())
         applyPreset();
 
@@ -41,19 +47,6 @@ void Component::setParent(Component* newParent)
         newParent->addChild(this);
 }
 
-QString Component::getName() const
-{
-    return name;
-}
-
-void Component::setName(const QString& newName)
-{
-    if (newName == name)
-        return;
-
-    name = newName;
-}
-
 QVariantMap Component::getProperties() const
 {
     return properties;
@@ -62,26 +55,6 @@ QVariantMap Component::getProperties() const
 void Component::setProperties(const QVariantMap& properties)
 {
     this->properties = properties;
-}
-
-QPointF Component::getPos() const
-{
-    return pos;
-}
-
-void Component::setPos(const QPointF& pos)
-{
-    this->pos = pos;
-}
-
-double Component::getScale() const
-{
-    return scale;
-}
-
-void Component::setScale(const double scale)
-{
-    this->scale = scale;
 }
 
 void Component::addChild(Component* child)
@@ -124,14 +97,14 @@ Component* Component::operator [](const QString& name)
 {
     auto iter = std::find_if(children.begin(), children.end(), [name](Component* component)
     {
-        return component->name == name;
+        return component->getName() == name;
     });
     return iter == children.end() ? nullptr : *iter;
 }
 
 bool Component::contains(const QRectF& sceneRect) const
 {
-    return sceneRect.contains(pos);
+    return sceneRect.contains(parent ? parent->localToGlobal(getPos()) : getPos());
 }
 
 void Component::update(const double time)
@@ -172,12 +145,20 @@ void Component::paint(QPainter* painter, const QRectF& sceneRect)
     flags ^= PaintFlag;
 }
 
-void Component::dump(const int offset)
+size_t Component::getChildCount() const
+{
+    return children.size();
+}
+
+void Component::dump(const int offset) const
 {
     const QString offsetStr(offset, QChar(' '));
-    qDebug("%s%s(%s)", qPrintable(offsetStr), typeid(this).name(), qPrintable(name));
-    qDebug("%s  x: %f, y: %f, rotation: %f", qPrintable(offsetStr), pos.x(), pos.y(), rotation);
-    qDebug() << "properties" << properties;
+    qDebug("%s%s(%s)", qPrintable(offsetStr), typeid(this).name(), qPrintable(getName()));
+    qDebug("  properties(%d):", properties.size());
+    for (auto c = properties.begin(), e = properties.end(); c != e; ++c)
+    {
+        qDebug() << "  " << c.key() << ":" << c.value();
+    }
     if (!children.empty())
     {
         qDebug("%s  childs(%lu)", qPrintable(offsetStr), children.size());
@@ -193,13 +174,52 @@ void Component::addEvent(Event* event)
     events.push_back(event);
 }
 
+QPointF Component::localToParent(const QPointF& localPos) const
+{
+    const QPointF pos = getPos();
+    const double scale = getScale();
+
+    QTransform transform;
+    transform.translate(pos.x(), pos.y());
+    transform.rotateRadians(getRotation());
+    transform.scale(scale, scale);
+    return transform.map(localPos);
+}
+
+QRectF Component::localToParent(const QRectF& localRect) const
+{
+    const QPointF pos = getPos();
+    const double scale = getScale();
+
+    QTransform transform;
+    transform.translate(pos.x(), pos.y());
+    transform.rotateRadians(getRotation());
+    transform.scale(scale, scale);
+    return transform.mapRect(localRect);
+}
+
+QPointF Component::localToGlobal(const QPointF& localPos) const
+{
+    return parent ? parent->localToGlobal(localToParent(localPos))
+                  : localToParent(localPos);
+}
+
+QRectF Component::localToGlobal(const QRectF& localRect) const
+{
+    return parent ? parent->localToGlobal(localToParent(localRect))
+                  : localToParent(localRect);
+}
+
 void Component::paintComponent(QPainter* painter, const QRectF& sceneRect)
 {
     Q_UNUSED(sceneRect);
 
+    const QPointF pos = getPos();
+    const double scale = getScale();
+
     QTransform transform = painter->transform();
     transform.translate(pos.x(), pos.y());
-    transform.rotateRadians(rotation);
+    transform.rotateRadians(getRotation());
     transform.scale(scale, scale);
     painter->setTransform(transform);
 }
@@ -228,6 +248,7 @@ void Component::applyPreset(const QString& name)
         return;
     }
     presets.append(name);
+    properties["presets"] = presets;
     applyPreset(preset);
 }
 

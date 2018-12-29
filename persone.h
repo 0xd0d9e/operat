@@ -17,13 +17,11 @@ public:
     Persone(Component* parent = nullptr, const QString& name = QString(), const QVariantMap& properties = QVariantMap());
 
     DECLARE_PROPERTY(QString, group, Group)
-    DECLARE_PROPERTY2(int, dir, Dir, onDirChanged)
 
     void update(const double time) override;
 
 private:
-    void onDirChanged(const int dir);
-    void nextDir();
+    void rotate();
 
     Shape* body;
     Shape* lhand;

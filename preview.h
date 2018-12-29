@@ -1,18 +1,21 @@
 #pragma once
 
-#include "scene.h"
+#include "stage_manager.h"
 #include "viewport.h"
-#include "viewport_control.h"
 
-class Preview
+#include <QObject>
+
+class Preview : public QObject
 {
+    Q_OBJECT
 public:
     Preview();
 
     void start();
 
 private:
+    void initResources();
+
     Viewport viewport;
-    Scene scene;
-    ViewportControl viewportControl;
+    StageManager stageManager;
 };
