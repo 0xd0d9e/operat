@@ -1,0 +1,17 @@
+{
+    "assets": [
+        {
+            "world_map": ":/assets/images/world_map.jpg"
+        }
+    ],
+
+    "presets": [
+        {
+            "name": "hand",
+            "properties": {
+                    "type": 0,
+                    "pen": ""
+            }
+        }
+    ]
+}
