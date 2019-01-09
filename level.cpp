@@ -1,7 +1,7 @@
 #include "level.h"
 
-#include "scene.h"
-#include "persone.h"
+#include "components/scene.h"
+#include "components/persone.h"
 
 Level::Level(const double tileSize)
     : tileSize(tileSize)

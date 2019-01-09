@@ -13,6 +13,7 @@ public:
 
     Stage* getCurrentStage() const;
     void setCurrentStage(const QString& name);
+    void setCurrentStage(Stage* stage);
 
     void addStage(const QString& name, Stage* stage);
 

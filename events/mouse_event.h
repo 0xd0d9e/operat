@@ -1,13 +1,15 @@
 #pragma once
 
+#include "event.h"
+
 #include <QPointF>
 
 class QMouseEvent;
 
-class ViewportMouseEvent
+class MouseEvent : public Event
 {
 public:
-    ViewportMouseEvent(QMouseEvent* event, const QPointF& scenePos);
+    MouseEvent(QMouseEvent* event, const QPointF& scenePos);
 
     QPointF getViewportPos() const;
     QPointF getScenePos() const;
@@ -16,6 +18,9 @@ public:
     int getModifiers() const;
 
 private:
+    QPointF viewportPos;
     QPointF scenePos;
-    QMouseEvent* event;
+    int button;
+    int buttons;
+    int modifiers;
 };

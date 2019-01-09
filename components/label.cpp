@@ -1,6 +1,6 @@
 #include "label.h"
 
-#include "debug.h"
+#include "common/debug.h"
 
 Label::Label(Component* parent, const QString& name, const QVariantMap& properties)
     : Shape(parent, name, properties)

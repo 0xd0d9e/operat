@@ -1,8 +1,11 @@
 #include "component.h"
 
-#include "debug.h"
-#include "event.h"
+#include "common/debug.h"
+#include "events/event.h"
+#include "events/invoke_event.h"
 #include "resource_manager.h"
+
+#include <cmath>
 
 Component::Component(Component* parent, const QString& name, const QVariantMap& properties)
     : properties(properties)
@@ -95,6 +98,11 @@ Component* Component::getRoot()
 
 Component* Component::operator [](const QString& name)
 {
+    return find(name);
+}
+
+Component* Component::find(const QString& name)
+{
     auto iter = std::find_if(children.begin(), children.end(), [name](Component* component)
     {
         return component->getName() == name;
@@ -110,12 +118,13 @@ bool Component::contains(const QRectF& sceneRect) const
 void Component::update(const double time)
 {
     flags |= UpdateFlag;
-    const int elapsed = floor(1000 * time);
+    const int elapsed = ::floor(1000.0 * time);
     auto iter = events.begin();
     while (iter != events.end())
     {
         Event* event = *iter;
-        if (event->prepare(elapsed))
+        prepareEvent(event, elapsed);
+        if (event->isComplete())
         {
             iter = events.erase(iter);
             delete event;
@@ -169,7 +178,7 @@ void Component::dump(const int offset) const
     }
 }
 
-void Component::addEvent(Event* event)
+void Component::postEvent(Event* event)
 {
     events.push_back(event);
 }
@@ -263,5 +272,20 @@ void Component::applyPreset(const QVariantMap& preset)
     for (auto iter = preset.begin(), end = preset.end(); iter != end; ++iter)
     {
         properties[iter.key()] = iter.value();
+    }
+}
+
+void Component::prepareEvent(Event* event, const int elapsed)
+{
+    if (event->getType() == Event::Invoke)
+    {
+        static_cast<InvokeEvent*>(event)->exec(elapsed);
+    }
+    else
+    {
+        for (Component* child : children)
+        {
+            child->prepareEvent(event, elapsed);
+        }
     }
 }

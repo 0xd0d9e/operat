@@ -6,21 +6,21 @@
 #include <QPainter>
 #include <QTimer>
 
-class Scene : public QObject
+class Scene : public QObject, public Component
 {
     Q_OBJECT
 public:
     Scene(QObject* parent = 0);
 
-    Component* getRoot() const;
+    bool isEnabled() const;
 
-    void paint(QPainter* painter, const QRectF& sceneRect);
+public slots:
+    void setEnabled(const bool enabled);
 
 private slots:
     void update();
 
 private:
-    Component* root;
     int updateCount = 0;
     QElapsedTimer timer;
     QTimer updateTimer;

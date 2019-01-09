@@ -1,9 +1,12 @@
 #pragma once
 
-#include "button_function.h"
+#include "common/button_function.h"
+#include "events/event_listener.h"
 #include "label.h"
 
-class MenuButton : public Label
+class MouseEvent;
+
+class Button : public Label, public EventListener
 {
 public:
     enum State
@@ -12,7 +15,7 @@ public:
         PressedState,
         HighlightState
     };
-    DECLARE_CONSTRUCTOR(MenuButton, Label)
+    DECLARE_CONSTRUCTOR(Button, Label)
 
     DECLARE_PROPERTY(ButtonFunction, function, Function)
     DECLARE_PROPERTY_D(int, state, State, NormalState)
@@ -22,4 +25,14 @@ public:
     DECLARE_PROPERTY(Style, highlightStyle, HighlightStyle)
 
     void paintComponent(QPainter *painter, const QRectF &sceneRect) override;
+
+    DECLARE_PREPARE_EVENT(Label)
+
+    void mousePress(MouseEvent *event);
+    void mouseMove(MouseEvent *event);
+    void mouseRelease(MouseEvent *event);
+
+private:
+    bool pressed = false;
+    QPointF pos;
 };

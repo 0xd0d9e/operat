@@ -1,11 +1,11 @@
 #include "preview.h"
 
+#include "common/style.h"
+#include "common/utils.h"
+#include "components/shape.h"
 #include "main_menu_stage.h"
 #include "preview_stage.h"
 #include "resource_manager.h"
-#include "shape.h"
-#include "style.h"
-#include "utils.h"
 
 #include <QApplication>
 
@@ -15,7 +15,7 @@ Preview::Preview()
     initResources();
 
     MainMenuStage* mainMenuStage = new MainMenuStage();
-    PreviewStage* previewStage = new PreviewStage();
+    PreviewStage* previewStage = new PreviewStage([this](){stageManager.setCurrentStage("MainMenu");});
 
     stageManager.addStage("MainMenu", mainMenuStage);
     stageManager.addStage("Preview", previewStage);
@@ -24,6 +24,7 @@ Preview::Preview()
     mainMenuStage->addButton(tr("Exit"), [](){qApp->quit();});
 
     stageManager.setCurrentStage("MainMenu");
+//    stageManager.setCurrentStage("Preview");
 }
 
 void Preview::start()

@@ -3,8 +3,7 @@
 #include <QTimer>
 #include <QWidget>
 
-class Scene;
-class ViewportListener;
+class Camera;
 class Component;
 
 class Viewport : public QWidget
@@ -14,19 +13,16 @@ class Viewport : public QWidget
 public:
     Viewport(QWidget* parent = 0);
 
-    Component* getOverlay() const;
+    Camera* getCamera() const;
+    void setCamera(Camera* camera);
 
-    void addListener(ViewportListener* listener);
-    void removeListener(ViewportListener* listener);
-
-    Scene* getScene() const;
-    void setScene(Scene* scene);
+    Component* getScene() const;
 
     void paintEvent(QPaintEvent* event);
     void resizeEvent(QResizeEvent *event);
 
-    const QTransform& getTransform() const;
-    const QTransform& getInverseTransform() const;
+    QPointF sceneToViewport(const QPointF& scenePos) const;
+    QPointF viewportToScene(const QPointF& viewportPos) const;
 
     QRectF getViewRect() const;
     void setViewRect(const QRectF& rect);
@@ -35,11 +31,7 @@ public:
     void zoomAnimated(const double factor, const QPointF& scenePos, const int duration);
     void setViewRectAnimated(const QRectF& rect, const int duration);
 
-    QPointF sceneToViewport(const QPointF& scenePos) const;
-    QPointF viewportToScene(const QPointF& viewportPos) const;
-
     double getScale() const;
-
 public slots:
     void update();
 
@@ -47,8 +39,6 @@ public slots:
     void pushLocation();
 
 private:
-    void updateBuffer();
-    void updateViewRect();
     void mousePressEvent(QMouseEvent* event) final;
     void mouseMoveEvent(QMouseEvent* event) final;
     void mouseReleaseEvent(QMouseEvent* event) final;
@@ -56,13 +46,7 @@ private:
     void keyReleaseEvent(QKeyEvent* event) final;
     void wheelEvent(QWheelEvent* event) final;
 
-    Component* overlay = nullptr;
-    Scene* scene = nullptr;
-    QRectF viewRect;
-    QTransform transform;
-    QTransform inverseTransform;
-    std::list<ViewportListener*> listeners;
     QTimer timer;
-    QPixmap frameBuffer;
+    Camera* camera;
     QList<QRectF> history;
 };

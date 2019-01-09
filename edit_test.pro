@@ -14,60 +14,66 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-        main.cpp \
     component.cpp \
-    shape.cpp \
-    scene.cpp \
-    viewport.cpp \
-    preview.cpp \
-    viewport_listener.cpp \
-    viewport_control.cpp \
-    viewport_mouse_event.cpp \
-    grid.cpp \
-    persone.cpp \
-    camera.cpp \
-    label.cpp \
-    sprite.cpp \
     resource_manager.cpp \
-    event.cpp \
-    grid_metrics.cpp \
     level.cpp \
     stage.cpp \
     stage_manager.cpp \
-    menu_button.cpp \
     main_menu_stage.cpp \
-    style.cpp \
-    preview_stage.cpp
+    events/wheel_event.cpp \
+    events/mouse_event.cpp \
+    events/key_event.cpp \
+    events/invoke_event.cpp \
+    events/event.cpp \
+    common/grid_metrics.cpp \
+    common/style.cpp \
+    preview/preview.cpp \
+    preview/preview_stage.cpp \
+    components/camera.cpp \
+    components/grid.cpp \
+    components/label.cpp \
+    preview/main.cpp \
+    components/persone.cpp \
+    components/scene.cpp \
+    components/shape.cpp \
+    components/sprite.cpp \
+    events/event_listener.cpp \
+    components/button.cpp \
+    viewport.cpp \
+    components/camera_control.cpp
 
 HEADERS += \
     component.h \
-    shape.h \
-    scene.h \
-    viewport.h \
-    preview.h \
-    viewport_listener.h \
-    viewport_control.h \
-    viewport_mouse_event.h \
-    grid.h \
-    persone.h \
-    config.h \
-    debug.h \
-    camera.h \
-    utils.h \
-    label.h \
-    sprite.h \
     resource_manager.h \
-    event.h \
-    grid_metrics.h \
     level.h \
     stage.h \
     stage_manager.h \
-    menu_button.h \
     main_menu_stage.h \
-    style.h \
-    button_function.h \
-    default_value.h \
-    preview_stage.h
+    events/wheel_event.h \
+    events/invoke_event.h \
+    events/key_event.h \
+    events/event.h \
+    events/mouse_event.h \
+    common/utils.h \
+    common/style.h \
+    common/button_function.h \
+    common/config.h \
+    common/debug.h \
+    common/default_value.h \
+    common/grid_metrics.h \
+    preview/preview.h \
+    preview/preview_stage.h \
+    components/camera.h \
+    components/grid.h \
+    components/persone.h \
+    components/scene.h \
+    components/shape.h \
+    components/sprite.h \
+    components/label.h \
+    events/event_listener.h \
+    components/button.h \
+    viewport.h \
+    components/camera_control.h
 
 RESOURCES += \
     resources.qrc

@@ -1,6 +1,6 @@
 #include "shape.h"
 
-#include "debug.h"
+#include "common/debug.h"
 
 Shape::Shape(Component* parent, const QString& name, const QVariantMap& properties)
     : Component(parent, name, properties)

@@ -1,7 +1,7 @@
 #include "grid.h"
 
-#include "debug.h"
-#include "grid_metrics.h"
+#include "common/debug.h"
+#include "common/grid_metrics.h"
 
 #include <QDebug>
 

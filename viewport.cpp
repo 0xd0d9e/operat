@@ -1,146 +1,140 @@
 #include "viewport.h"
 
-#include "config.h"
-#include "debug.h"
-#include "label.h"
-#include "scene.h"
-#include "utils.h"
-#include "viewport_listener.h"
-#include "viewport_mouse_event.h"
+#include "common/config.h"
+#include "common/debug.h"
+#include "common/utils.h"
+#include "components/camera.h"
+#include "components/label.h"
+#include "events/key_event.h"
+#include "events/mouse_event.h"
+#include "events/wheel_event.h"
 
 #include <QPaintEvent>
 #include <QPropertyAnimation>
 
-void viewportTest()
-{
-    Viewport viewport;
-    viewport.resize(100, 100);
-    viewport.setViewRect({10, 10, 100, 100});
-
-    const QPointF expectedViewportPos(0, 0);
-    const QPointF viewportPos = viewport.sceneToViewport({10, 10});
-    const QPointF expectedScenePos(20, 20);
-    const QPointF scenePos = viewport.viewportToScene({10, 10});
-
-    TEST_ASSERT(viewportPos, expectedViewportPos);
-    TEST_ASSERT(scenePos, expectedScenePos);
-}
-
+#include <cmath>
 
 Viewport::Viewport(QWidget* parent) : QWidget(parent)
-    , overlay(new Component(nullptr, "overlay"))
 {
-    TEST(viewportTest);
     connect(&timer, &QTimer::timeout, this, &Viewport::update);
 
     timer.start(Config::paintInterval);
 
     setMouseTracking(true);
-
-    overlay->create<Label>("debugLabel", {{"color", QColor(Qt::red)},
-                                          {"font", QFont("Monospace", 16)},
-                                          {"type", Shape::Rectangle},
-                                          {"style", Style(QBrush("#aaaaffaa"))},
-                                          {"margin", 5.0}});
 }
 
-Component* Viewport::getOverlay() const
+Component* Viewport::getScene() const
 {
-    return overlay;
+    return camera ? camera->getScene()
+                  : nullptr;
 }
 
-void Viewport::addListener(ViewportListener* listener)
+Camera* Viewport::getCamera() const
 {
-    listeners.push_back(listener);
+    return camera;
 }
 
-void Viewport::removeListener(ViewportListener* listener)
+void Viewport::setCamera(Camera* newCamera)
 {
-    listeners.remove(listener);
-}
+    if (camera == newCamera)
+        return;
 
-Scene* Viewport::getScene() const
-{
-    return scene;
-}
-
-void Viewport::setScene(Scene* scene)
-{
-    this->scene = scene;
+    camera = newCamera;
+    if (camera)
+        camera->setFrameSize(size());
+    update();
 }
 
 void Viewport::paintEvent(QPaintEvent* event)
 {
-    Q_UNUSED(event);
-
-    updateBuffer();
+    if (!camera)
+        return;
 
     QPainter painter(this);
-    painter.drawPixmap(0, 0, frameBuffer);
+    camera->paint(&painter, event->rect());
 }
 
 void Viewport::resizeEvent(QResizeEvent* event)
 {
     QWidget::resizeEvent(event);
-    if (viewRect.isNull())
-        viewRect = QRectF(0, 0, width(), height());
-    frameBuffer = QPixmap(width(), height());
-    updateViewRect();
+
+    if (!camera)
+        return;
+
+    camera->setFrameSize(event->size());
 }
 
-const QTransform& Viewport::getTransform() const
+QPointF Viewport::sceneToViewport(const QPointF& scenePos) const
 {
-    return transform;
+    return camera ? camera->sceneToViewport(scenePos)
+                  : scenePos;
 }
 
-const QTransform&Viewport::getInverseTransform() const
+QPointF Viewport::viewportToScene(const QPointF& viewportPos) const
 {
-    return inverseTransform;
+    return camera ? camera->viewportToScene(viewportPos)
+                  : viewportPos;
 }
 
 QRectF Viewport::getViewRect() const
 {
-    return viewRect;
+    return camera ? camera->getViewRect()
+                  : QRectF();
 }
 
 void Viewport::setViewRect(const QRectF& rect)
 {
-    viewRect = rect;
-    updateViewRect();
+    if (!camera)
+        return;
+
+    camera->setViewRect(rect);
+    update();
 }
 
 void Viewport::moveBy(const QPointF& diff)
 {
+    if (!camera)
+        return;
+
+    QRectF viewRect = camera->getViewRect();
     viewRect.moveTopLeft(viewRect.topLeft() + diff);
-    updateViewRect();
+    setViewRect(viewRect);
 }
 
 void Viewport::zoom(const double factor, const QPointF& scenePos)
 {
+    if (!camera)
+        return;
+
     const QPointF pos = scenePos;
 
     QTransform transform;
     transform.translate(pos.x(), pos.y());
     transform.scale(factor, factor);
     transform.translate(-pos.x(), -pos.y());
-    setViewRect(transform.mapRect(viewRect));
+    setViewRect(transform.mapRect(camera->getViewRect()));
 }
 
 void Viewport::zoomAnimated(const double factor, const QPointF& scenePos, const int duration)
 {
+    if (!camera)
+        return;
+
     const QPointF pos = scenePos;
 
     QTransform transform;
     transform.translate(pos.x(), pos.y());
     transform.scale(factor, factor);
     transform.translate(-pos.x(), -pos.y());
-    setViewRectAnimated(transform.mapRect(viewRect), duration);
+    setViewRectAnimated(transform.mapRect(camera->getViewRect()), duration);
 }
 
 void Viewport::setViewRectAnimated(const QRectF& rect, const int duration)
 {
     if (duration <= 0)
         setViewRect(rect);
+
+    QRectF viewRect = camera->getViewRect();
     QPropertyAnimation* animation = new QPropertyAnimation(this, "viewRect");
     animation->setDuration(duration);
     animation->setStartValue(viewRect);
@@ -159,19 +153,10 @@ void Viewport::setViewRectAnimated(const QRectF& rect, const int duration)
     animation->start();
 }
 
-QPointF Viewport::sceneToViewport(const QPointF& scenePos) const
-{
-    return transform.map(scenePos);
-}
-
-QPointF Viewport::viewportToScene(const QPointF& viewportPos) const
-{
-    return inverseTransform.map(viewportPos);
-}
-
 double Viewport::getScale() const
 {
-    return std::min(width() / viewRect.width(), height() / viewRect.height());
+    return camera ? camera->getScale()
+                  : 1.0;
 }
 
 void Viewport::update()
@@ -192,113 +177,53 @@ void Viewport::popLocation(const int duration)
 
 void Viewport::pushLocation()
 {
-    history.push_front(viewRect);
-}
-
-void Viewport::updateBuffer()
-{
-    frameBuffer.fill();
-
-    if (!scene && !overlay)
-        return;
-
-    QPainter painter(&frameBuffer);
-
-    if (scene)
-    {
-        const QRectF sceneRect = inverseTransform.mapRect(QRectF(0, 0, width(), height()));
-        painter.save();
-        painter.setTransform(transform);
-        scene->paint(&painter, sceneRect);
-        painter.restore();
-    }
-
-    QStringList lines;
-    lines << QString("Scale %1x%2").arg(viewRect.width() / width()).arg(viewRect.height() / height());
-    lines << QString("Center x:%1, y:%2")
-             .arg(viewRect.center().x(), 0, 'f', 1)
-             .arg(viewRect.center().y(), 0, 'f', 1);
-    //overlay->get<Label>("debugLabel")->setText(lines.join("\n"));
-
-    if (overlay)
-        overlay->paint(&painter, {0.0, 0.0, (double) width(), (double) height()});
-}
-
-void Viewport::updateViewRect()
-{
-    const double scale = getScale();
-
-    transform = QTransform();
-    transform.translate(width() / 2.0, height() / 2.0);
-    transform.scale(scale, scale);
-    transform.translate(-viewRect.width() / 2.0, -viewRect.height() / 2.0);
-    transform.translate(-viewRect.x(), -viewRect.y());
-
-    inverseTransform = QTransform();
-    inverseTransform.translate(viewRect.x(), viewRect.y());
-    inverseTransform.translate(-viewRect.width() / 2.0, -viewRect.height() / 2.0);
-    inverseTransform.scale(1.0/scale, 1.0/scale);
-    inverseTransform.translate(width() / 2.0, height() / 2.0);
-    update();
+    history.push_front(getViewRect());
 }
 
 void Viewport::mousePressEvent(QMouseEvent* event)
 {
-    if (listeners.empty())
+    Component* scene = getScene();
+    if (!scene)
         return;
-
-    const ViewportMouseEvent viewportMouseEvent(event, viewportToScene(event->pos()));
-
-    for (ViewportListener* listener : listeners)
-        listener->mousePress(viewportMouseEvent);
+    scene->postEvent(new MouseEvent(event, viewportToScene(event->pos())));
 }
 
 void Viewport::mouseMoveEvent(QMouseEvent* event)
 {
-    if (listeners.empty())
+    Component* scene = getScene();
+    if (!scene)
         return;
-
-    const ViewportMouseEvent viewportMouseEvent(event, viewportToScene(event->pos()));
-
-    for (ViewportListener* listener : listeners)
-        listener->mouseMove(viewportMouseEvent);
+    scene->postEvent(new MouseEvent(event, viewportToScene(event->pos())));
 }
 
 void Viewport::mouseReleaseEvent(QMouseEvent* event)
 {
-    if (listeners.empty())
+    Component* scene = getScene();
+    if (!scene)
         return;
-
-    const ViewportMouseEvent viewportMouseEvent(event, viewportToScene(event->pos()));
-
-    for (ViewportListener* listener : listeners)
-        listener->mouseRelease(viewportMouseEvent);
+    scene->postEvent(new MouseEvent(event, viewportToScene(event->pos())));
 }
 
 void Viewport::keyPressEvent(QKeyEvent* event)
 {
-    if (listeners.empty())
+    Component* scene = getScene();
+    if (!scene)
         return;
-
-    for (ViewportListener* listener : listeners)
-        listener->keyPress(event->key(), event->modifiers());
+    scene->postEvent(new KeyEvent(event));
 }
 
 void Viewport::keyReleaseEvent(QKeyEvent* event)
 {
-    if (listeners.empty())
+    Component* scene = getScene();
+    if (!scene)
         return;
-
-    for (ViewportListener* listener : listeners)
-        listener->keyRelease(event->key(), event->modifiers());
+    scene->postEvent(new KeyEvent(event));
 }
 
 void Viewport::wheelEvent(QWheelEvent* event)
 {
-    if (listeners.empty())
+    Component* scene = getScene();
+    if (!scene)
         return;
-
-    const QPointF scenePos = viewportToScene(event->pos());
-    for (ViewportListener* listener : listeners)
-        listener->wheel(scenePos, event->delta());
+    scene->postEvent(new WheelEvent(event, viewportToScene(event->pos())));
 }

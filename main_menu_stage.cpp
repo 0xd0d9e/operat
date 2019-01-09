@@ -1,13 +1,18 @@
 #include "main_menu_stage.h"
 
-#include "debug.h"
-#include "scene.h"
-#include "menu_button.h"
+#include "common/debug.h"
+#include "components/button.h"
+#include "components/camera.h"
+#include "components/scene.h"
+#include "events/event.h"
+#include "events/invoke_event.h"
+#include "events/mouse_event.h"
 #include "viewport.h"
-#include "viewport_mouse_event.h"
 
 MainMenuStage::MainMenuStage()
 {
+    camera = scene.create<Camera>();
+    camera->setScene(&scene);
 }
 
 void MainMenuStage::addButton(const QString& text, ButtonFunction function)
@@ -17,15 +22,16 @@ void MainMenuStage::addButton(const QString& text, ButtonFunction function)
 
     if (height > margin)
         height += spacing;
-    Component* root = scene.getRoot();
-    MenuButton* button = root->create<MenuButton>(text, {{"preset", "menuButton"},
-                                                         {"text", text},
-                                                         {"function", toVariant(function)},
-                                                         {"pos", QPointF(margin, height)}});
+
+    Button* button = scene.create<Button>(text, {{"preset", "menuButton"},
+                                                 {"text", text},
+                                                 {"function", toVariant(function)},
+                                                 {"pos", QPointF(margin, height)}});
     const QRectF rect = button->getRect();
     width = std::max(rect.width(), width);
     height += rect.height();
     buttons.push_back(button);
+    camera->setViewRect({0, 0, width + margin * 2.0, height + margin});
 }
 
 void MainMenuStage::setViewport(Viewport* newViewport)
@@ -35,55 +41,14 @@ void MainMenuStage::setViewport(Viewport* newViewport)
 
     if (viewport)
     {
-        viewport->setScene(nullptr);
-        viewport->removeListener(this);
+        viewport->setCamera(nullptr);
     }
 
     viewport = newViewport;
+    scene.setEnabled(viewport != nullptr);
 
     if (viewport)
     {
-        viewport->addListener(this);
-        viewport->setScene(&scene);
-        viewport->setViewRect({0, 0, width + margin * 2.0, height + margin});
-    }
-}
-
-void MainMenuStage::mouseMove(const ViewportMouseEvent& event)
-{
-    if (pressed)
-        return;
-    for (MenuButton* button : buttons)
-    {
-        const bool hover = button->contains(QRectF(event.getScenePos(), QSizeF(1.0, 1.0)));
-        button->setState(hover ? MenuButton::HighlightState : MenuButton::NormalState);
-    }
-}
-
-void MainMenuStage::mousePress(const ViewportMouseEvent& event)
-{
-    if (pressed || event.getButton() != Qt::LeftButton)
-        return;
-
-    for (MenuButton* button : buttons)
-    {
-        if (button->contains(QRectF(event.getScenePos(), QSizeF(1.0, 1.0))))
-        {
-            pressed = button;
-            button->setState(MenuButton::PressedState);
-            break;
-        }
-    }
-}
-
-void MainMenuStage::mouseRelease(const ViewportMouseEvent& event)
-{
-    Q_UNUSED(event);
-    if (pressed)
-    {
-        if (pressed->contains(QRectF(event.getScenePos(), QSizeF(1.0, 1.0))))
-            pressed->getFunction()();
-        pressed->setState(MenuButton::NormalState);
-        pressed = nullptr;
+        viewport->setCamera(camera);
     }
 }

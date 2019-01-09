@@ -1,7 +1,7 @@
 #pragma once
 
 #include "component.h"
-#include "style.h"
+#include "common/style.h"
 
 class Shape : public Component
 {

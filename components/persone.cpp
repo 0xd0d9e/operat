@@ -1,8 +1,11 @@
 #include "persone.h"
 
-#include "event.h"
+#include "common/utils.h"
+#include "events/event.h"
+#include "events/invoke_event.h"
 #include "shape.h"
-#include "utils.h"
+
+#include <cmath>
 
 Persone::Persone(Component* parent, const QString& name, const QVariantMap& properties)
     : Component(parent, name, properties)
@@ -13,7 +16,7 @@ Persone::Persone(Component* parent, const QString& name, const QVariantMap& prop
     lhand->setPos({0.25, 0.25});
     rhand->setPos({0.25,-0.25});
 
-    //addEvent(new Event([this](){rotate();}, Event::Regular, 0, -1000));
+    postEvent(new InvokeEvent([this](){rotate();}, true, 0, -1000));
 }
 
 void Persone::update(const double time)

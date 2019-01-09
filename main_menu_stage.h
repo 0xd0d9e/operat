@@ -1,13 +1,13 @@
 #pragma once
 
-#include "button_function.h"
-#include "scene.h"
+#include "common/button_function.h"
+#include "components/scene.h"
 #include "stage.h"
-#include "viewport_listener.h"
 
-class MenuButton;
+class Button;
+class Camera;
 
-class MainMenuStage : public Stage, public ViewportListener
+class MainMenuStage : public Stage
 {
 public:
     MainMenuStage();
@@ -17,16 +17,12 @@ public:
     void setViewport(Viewport* viewport) final;
 
 private:
-    void mouseMove(const ViewportMouseEvent &event) final;
-    void mousePress(const ViewportMouseEvent &event) final;
-    void mouseRelease(const ViewportMouseEvent &event) final;
-
-    std::list<MenuButton*> buttons;
+    std::list<Button*> buttons;
     Viewport* viewport = nullptr;
     Scene scene;
+    Camera* camera;
     double width = 0;
     double height = 0;
     double spacing = 20;
     double margin = 20;
-    MenuButton* pressed = nullptr;
 };

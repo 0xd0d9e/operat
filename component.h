@@ -1,6 +1,6 @@
 #pragma once
 
-#include "default_value.h"
+#include "common/default_value.h"
 
 #include <QPainter>
 #include <QString>
@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <list>
+#include <functional>
 
 #define DECLARE_PROPERTY_CD(Type, name, Name, onChange, byDefault) \
     static const char* name##Key() { return #name; } \
@@ -57,6 +58,7 @@ public:
     Component* getRoot();
 
     Component* operator [] (const QString& name);
+    Component* find(const QString& name);
 
     virtual bool contains(const QRectF& sceneRect) const;
 
@@ -78,18 +80,30 @@ public:
 
     void dump(const int offset = 0) const;
 
-    void addEvent(Event* event);
+    void postEvent(Event* event);
 
     QPointF localToParent(const QPointF& localPos) const;
     QRectF localToParent(const QRectF& localRect) const;
 
     QPointF localToGlobal(const QPointF& localPos) const;
     QRectF localToGlobal(const QRectF& localRect) const;
+
+    template <typename Type>
+    Type* cast() { return static_cast<Type*>(this); }
+    template <typename Type>
+    const Type* cast() const { return static_cast<const Type*>(this); }
+
 protected:
     virtual void paintComponent(QPainter* painter, const QRectF& sceneRect);
+
+    /// read and apply preset
     void applyPreset();
+    /// find and apply preset
     void applyPreset(const QString& name);
+    /// copy properties from preset
     void applyPreset(const QVariantMap& preset);
+    /// return true if event is complete
+    virtual void prepareEvent(Event* event, const int elapsed);
 
     QVariantMap properties;
 
