@@ -118,25 +118,25 @@ bool Component::contains(const QRectF& sceneRect) const
 void Component::update(const double time)
 {
     flags |= UpdateFlag;
-    const int elapsed = ::floor(1000.0 * time);
-    auto iter = events.begin();
-    while (iter != events.end())
+    prepareEvents(time);
+
+    auto iter = children.begin();
+    while (iter != children.end())
     {
-        Event* event = *iter;
-        prepareEvent(event, elapsed);
-        if (event->isComplete())
+        Component* child = *iter;
+        child->update(time);
+        if (child->flags & DeleteLater)
         {
-            iter = events.erase(iter);
-            delete event;
+            iter = children.erase(iter);
+            child->parent = nullptr;
+            child->flags ^= DeleteLater;
+            delete child;
         }
         else
         {
             ++iter;
         }
     }
-
-    for (Component* child : children)
-        child->update(time);
 
     flags ^= UpdateFlag;
 }
@@ -219,6 +219,18 @@ QRectF Component::localToGlobal(const QRectF& localRect) const
                   : localToParent(localRect);
 }
 
+void Component::deleteLater()
+{
+    if (flags & UpdateFlag || (parent && (parent->flags & UpdateFlag)))
+    {
+        flags |= DeleteLater;
+    }
+    else
+    {
+        delete this;
+    }
+}
+
 void Component::paintComponent(QPainter* painter, const QRectF& sceneRect)
 {
     Q_UNUSED(sceneRect);
@@ -286,6 +298,26 @@ void Component::prepareEvent(Event* event, const int elapsed)
         for (Component* child : children)
         {
             child->prepareEvent(event, elapsed);
+        }
+    }
+}
+
+void Component::prepareEvents(const double time)
+{
+    const int elapsed = ::floor(1000.0 * time);
+    auto iter = events.begin();
+    while (iter != events.end())
+    {
+        Event* event = *iter;
+        prepareEvent(event, elapsed);
+        if (event->isComplete())
+        {
+            iter = events.erase(iter);
+            delete event;
+        }
+        else
+        {
+            ++iter;
         }
     }
 }

@@ -93,6 +93,8 @@ public:
     template <typename Type>
     const Type* cast() const { return static_cast<const Type*>(this); }
 
+    void deleteLater();
+
 protected:
     virtual void paintComponent(QPainter* painter, const QRectF& sceneRect);
 
@@ -108,11 +110,14 @@ protected:
     QVariantMap properties;
 
 private:
+    void prepareEvents(const double time);
+
     enum GuardFlags
     {
         NoGuardFlags = 0,
         UpdateFlag = 1,
-        PaintFlag = 2
+        PaintFlag = 2,
+        DeleteLater = 4
     };
 
     Component* parent = nullptr;

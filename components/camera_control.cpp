@@ -86,10 +86,10 @@ void CameraControl::mousePress(MouseEvent* event)
 
     if (event->getButtons() == Qt::LeftButton && event->getModifiers() == Qt::ControlModifier)
     {
-        Component* overlay = camera->getOverlay();
-        if (overlay)
+        Component* scene = camera->getScene();
+        if (scene)
         {
-            moveRect = overlay->create<Shape>("moveRect",
+            moveRect = scene->create<Shape>("moveRect",
             {
                 {"style", Style(QPen(Qt::green, 2), QBrush(QColor("#aa00aa00")))},
                 {"rect", QRectF()},
@@ -148,7 +148,7 @@ void CameraControl::mouseRelease(MouseEvent* event)
             }
             pushLocation();
             setViewRect(rect, viewDuration);
-            delete moveRect;
+            moveRect->deleteLater();
             moveRect = nullptr;
         }
     }
