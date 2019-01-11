@@ -1,7 +1,8 @@
 #pragma once
 
-#include "component.h"
+#include "components/component.h"
 
+class Event;
 class MouseEvent;
 class KeyEvent;
 class WheelEvent;

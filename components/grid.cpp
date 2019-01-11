@@ -2,6 +2,7 @@
 
 #include "common/debug.h"
 #include "common/grid_metrics.h"
+#include "common/utils.h"
 
 #include <QDebug>
 
@@ -29,7 +30,8 @@ void Grid::paintComponent(QPainter* painter, const QRectF& sceneRect)
             ? sceneRect
             : rect.intersected(sceneRect);
 
-    const GridMetrics metrics(getSize());
+    const double scale = std::max(1.0, floor(1.0 / calcMinScale(painter->transform())));
+    const GridMetrics metrics(getSize() * scale);
     const int leftIndex = metrics.floor(targetRect.x());
     const int topIndex = metrics.floor(targetRect.y());
     const int gridWidth = metrics.ceil(targetRect.width()) + 1;

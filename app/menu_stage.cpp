@@ -1,4 +1,4 @@
-#include "main_menu_stage.h"
+#include "menu_stage.h"
 
 #include "common/debug.h"
 #include "components/button.h"
@@ -9,13 +9,14 @@
 #include "events/mouse_event.h"
 #include "viewport.h"
 
-MainMenuStage::MainMenuStage()
+MenuStage::MenuStage()
 {
-    camera = scene.create<Camera>();
+    camera = scene.create<Camera>("menuCamera", {{"viewRect", QRectF(0, 0, 100, 100)},
+                                                 {"frameSize", QSizeF(100, 100)}});
     camera->setScene(&scene);
 }
 
-void MainMenuStage::addButton(const QString& text, ButtonFunction function)
+void MenuStage::addButton(const QString& text, ButtonFunction function)
 {
     if (height < margin)
         height = margin;
@@ -34,7 +35,7 @@ void MainMenuStage::addButton(const QString& text, ButtonFunction function)
     camera->setViewRect({0, 0, width + margin * 2.0, height + margin});
 }
 
-void MainMenuStage::setViewport(Viewport* newViewport)
+void MenuStage::setViewport(Viewport* newViewport)
 {
     if (viewport == newViewport)
         return;

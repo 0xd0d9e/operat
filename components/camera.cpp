@@ -1,13 +1,26 @@
 #include "camera.h"
 
-void Camera::paint(QPainter* painter, const QRectF& sceneRect)
+#include "common/debug.h"
+
+void Camera::render(QPainter* painter, const QRectF& sceneRect)
 {
+//    DEBUG_LOCATION();
+//    DEBUG_VALUE(getName());
+//    DEBUG_VALUE(sceneRect);
+
     if (rendering)
         return;
-    Q_UNUSED(sceneRect);
+
+    const QSizeF frameSize = getFrameSize();
+
+    if (frameSize.isNull())
+        return;
+
+    if (getViewRect().isNull())
+        return;
 
     updateTransform();
-    updateFrameBuffer();
+    updateFrameBuffer(sceneRect.isNull() ? QRectF(0, 0, frameSize.width(), frameSize.height()) : sceneRect);
     painter->drawPixmap(0, 0, frameBuffer);
 }
 
@@ -29,13 +42,6 @@ QPointF Camera::sceneToViewport(const QPointF& scenePos) const
 QPointF Camera::viewportToScene(const QPointF& viewportPos) const
 {
     return inverseTransform.map(viewportPos);
-}
-
-double Camera::getScale() const
-{
-    const QRectF viewRect = getViewRect();
-    const QSizeF frameSize = getFrameSize();
-    return std::min(frameSize.width() / viewRect.width(), frameSize.height() / viewRect.height());
 }
 
 Component* Camera::getScene() const
@@ -75,41 +81,78 @@ void Camera::zoom(const double factor, const QPointF& scenePos)
     setViewRect(transform.mapRect(getViewRect()));
 }
 
+QPointF Camera::getScale() const
+{
+    const QRectF viewRect = getViewRect();
+    const QSizeF frameSize = getFrameSize();
+    double scaleX = frameSize.width() / viewRect.width();
+    double scaleY = frameSize.height() / viewRect.height();
+
+    if (getKeepAspect())
+    {
+        scaleX = scaleY = std::min(scaleX, scaleY);
+    }
+    return QPointF(scaleX, scaleY);
+}
+
+void Camera::init()
+{
+    Component::init();
+    if (properties.contains(frameSizeKey()))
+        onFrameSizeChanged(getFrameSize());
+}
+
 void Camera::updateTransform()
 {
     const QRectF viewRect = getViewRect();
     const QSizeF frameSize = getFrameSize();
-    const double scale = getScale();
+    const QPointF scale = getScale();
 
     transform = QTransform();
     transform.translate(frameSize.width() / 2.0, frameSize.height() / 2.0);
-    transform.scale(scale, scale);
+    transform.scale(scale.x(), scale.y());
     transform.translate(-viewRect.width() / 2.0, -viewRect.height() / 2.0);
     transform.translate(-viewRect.x(), -viewRect.y());
 
     inverseTransform = QTransform();
     inverseTransform.translate(viewRect.x(), viewRect.y());
     inverseTransform.translate(viewRect.width() / 2.0, viewRect.height() / 2.0);
-    inverseTransform.scale(1.0/scale, 1.0/scale);
+    inverseTransform.scale(1.0/scale.x(), 1.0/scale.y());
     inverseTransform.translate(-frameSize.width() / 2.0, -frameSize.height() / 2.0);
 }
 
-void Camera::updateFrameBuffer()
+void Camera::updateFrameBuffer(const QRectF& rect)
 {
     rendering = true;
-    const QSizeF frameSize = getFrameSize();
-    frameBuffer = QPixmap(frameSize.width(), frameSize.height());
-    frameBuffer.fill();
 
-    if (!scene || frameSize.isNull())
+    if (frameBuffer.isNull() || !(scene || overlay) || rect.isNull())
+    {
         return;
-
-    const QRectF sceneRect = inverseTransform.mapRect(QRectF(0, 0, frameSize.width(), frameSize.height()));
+    }
 
     QPainter painter(&frameBuffer);
-    painter.save();
-    painter.setTransform(transform);
-    scene->paint(&painter, sceneRect);
-    painter.restore();
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(QBrush(getClearColor()));
+    painter.drawRect(rect);
+
+    if (scene)
+    {
+        painter.save();
+        painter.setTransform(transform);
+        scene->paint(&painter, inverseTransform.mapRect(rect));
+        painter.restore();
+    }
+
+    if (overlay)
+    {
+        overlay->paint(&painter, rect);
+    }
+
     rendering = false;
+}
+
+void Camera::onFrameSizeChanged(const QSizeF& size)
+{
+    frameBuffer = QPixmap(size.width(), size.height());
+    frameBuffer.fill();
 }

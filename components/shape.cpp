@@ -2,15 +2,6 @@
 
 #include "common/debug.h"
 
-Shape::Shape(Component* parent, const QString& name, const QVariantMap& properties)
-    : Component(parent, name, properties)
-{
-    if (getType() == 0)
-    {
-        delete (int*)123;
-    }
-}
-
 bool Shape::contains(const QRectF& sceneRect) const
 {
     return sceneRect.intersects(localToGlobal(getRect()));

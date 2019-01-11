@@ -7,7 +7,7 @@
 class Label : public Shape
 {
 public:
-    Label(Component* parent = nullptr, const QString& name = QString(), const QVariantMap& properties = QVariantMap());
+    DECLARE_CONSTRUCTOR(Label, Shape)
 
     DECLARE_PROPERTY_C(QString, text, Text, onTextChanged)
     DECLARE_PROPERTY(QColor, color, Color)
@@ -18,6 +18,9 @@ public:
     DECLARE_PROPERTY_D(double, minimumWidth, MinimumWidth, 0.0)
 
     void paintComponent(QPainter *painter, const QRectF &sceneRect) override;
+
+protected:
+    void init() override;
 
 private:
     void onTextChanged(const QString& text);

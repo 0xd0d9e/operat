@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/assets/images">
         <file>world_map.jpg</file>
+        <file>SimpleWMAuthaGraph.png</file>
+        <file>ship.png</file>
     </qresource>
 </RCC>

@@ -1,4 +1,4 @@
-#include "preview.h"
+#include "app.h"
 
 #include <QApplication>
 #include <QVariant>
@@ -7,8 +7,8 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    Preview preview;
-    preview.start();
+    App app;
+    app.start();
 
     return a.exec();
 }

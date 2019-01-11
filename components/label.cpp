@@ -2,12 +2,6 @@
 
 #include "common/debug.h"
 
-Label::Label(Component* parent, const QString& name, const QVariantMap& properties)
-    : Shape(parent, name, properties)
-{
-    updateRect(getText(), getFont());
-}
-
 void Label::paintComponent(QPainter* painter, const QRectF& sceneRect)
 {
     Shape::paintComponent(painter, sceneRect);
@@ -15,6 +9,11 @@ void Label::paintComponent(QPainter* painter, const QRectF& sceneRect)
     painter->setFont(getFont());
     painter->setPen(QPen(getColor()));
     painter->drawText(getTextRect(), getTextAlign(), getText());
+}
+
+void Label::init()
+{
+    updateRect(getText(), getFont());
 }
 
 void Label::onTextChanged(const QString& text)

@@ -10,6 +10,7 @@ Scene::Scene(QObject* parent)
     : QObject(parent)
     , Component(nullptr, "root")
 {
+    init();
     updateTimer.setInterval(Config::updateInterval);
     connect(&updateTimer, &QTimer::timeout, this, &Scene::update);
 }

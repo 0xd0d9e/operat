@@ -21,6 +21,8 @@ class CameraControl
     Q_OBJECT
     Q_PROPERTY(QRectF viewRect READ getViewRect WRITE setViewRect)
 public:
+    DECLARE_CONSTRUCTOR(CameraControl, Component)
+
     void setCamera(Camera* camera);
 
     QRectF getViewRect() const;

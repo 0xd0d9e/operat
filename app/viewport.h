@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QElapsedTimer>
 #include <QTimer>
 #include <QWidget>
 
@@ -9,7 +10,6 @@ class Component;
 class Viewport : public QWidget
 {
     Q_OBJECT
-    Q_PROPERTY(QRectF viewRect READ getViewRect WRITE setViewRect)
 public:
     Viewport(QWidget* parent = 0);
 
@@ -24,19 +24,8 @@ public:
     QPointF sceneToViewport(const QPointF& scenePos) const;
     QPointF viewportToScene(const QPointF& viewportPos) const;
 
-    QRectF getViewRect() const;
-    void setViewRect(const QRectF& rect);
-    void moveBy(const QPointF& diff);
-    void zoom(const double factor, const QPointF& scenePos);
-    void zoomAnimated(const double factor, const QPointF& scenePos, const int duration);
-    void setViewRectAnimated(const QRectF& rect, const int duration);
-
-    double getScale() const;
 public slots:
     void update();
-
-    void popLocation(const int duration = 0);
-    void pushLocation();
 
 private:
     void mousePressEvent(QMouseEvent* event) final;
@@ -48,5 +37,8 @@ private:
 
     QTimer timer;
     Camera* camera;
-    QList<QRectF> history;
+
+    bool showFps = true;
+    QElapsedTimer timeMeter;
+    int frameCount = 0;
 };

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "components/scene.h"
+#include "app/stage.h"
 #include "components/camera_control.h"
+#include "components/scene.h"
 #include "events/event_listener.h"
-#include "stage.h"
 
 class Camera;
 

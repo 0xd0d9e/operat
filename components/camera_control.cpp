@@ -123,9 +123,10 @@ void CameraControl::mouseMove(MouseEvent* event)
     }
     else if (event->getButtons() == Qt::RightButton)
     {
-        const QPointF diff = (pressPos - event->getViewportPos()) / camera->getScale();
+        const QPointF scale = camera->getScale();
+        const QPointF diff = pressPos - event->getViewportPos();
         QTransform transform;
-        transform.translate(diff.x(), diff.y());
+        transform.translate(diff.x() / scale.x(), diff.y() / scale.y());
         camera->setViewRect(transform.mapRect(pressRect));
     }
 }
@@ -222,7 +223,9 @@ void CameraControl::update(const double time)
 
     if (!vec.isNull())
     {
-        const QPointF offset = vec * speed / camera->getScale() * time;
+        const QPointF scale = camera->getScale();
+        const QPointF offset(vec.x() * speed / scale.x() * time,
+                             vec.y() * speed / scale.y() * time);
         camera->moveBy(offset);
     }
 }

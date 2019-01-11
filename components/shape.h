@@ -13,7 +13,7 @@ public:
         Ellipse
     };
 
-    Shape(Component* parent = nullptr, const QString& name = QString(), const QVariantMap& properties = QVariantMap());
+    DECLARE_CONSTRUCTOR(Shape, Component)
 
     DECLARE_PROPERTY(Style, style, Style)
     DECLARE_PROPERTY(int, type, Type)

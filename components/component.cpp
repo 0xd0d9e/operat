@@ -1,24 +1,19 @@
 #include "component.h"
 
+#include "app/resource_manager.h"
+#include "app/service_manager.h"
 #include "common/debug.h"
+#include "common/utils.h"
 #include "events/event.h"
 #include "events/invoke_event.h"
-#include "resource_manager.h"
 
 #include <cmath>
 
 Component::Component(Component* parent, const QString& name, const QVariantMap& properties)
     : properties(properties)
 {
-    if (!properties.contains(scaleKey()))
-        setScale(1.0);
-    if (!properties.contains(rotationKey()))
-        setRotation(0.0);
-
     if (!name.isEmpty())
         setName(name);
-    if (!properties.empty())
-        applyPreset();
 
     if (parent)
         parent->addChild(this);
@@ -145,7 +140,11 @@ void Component::paint(QPainter* painter, const QRectF& sceneRect)
 {
     flags |= PaintFlag;
     painter->save();
-    paintComponent(painter, sceneRect);
+
+    if (checkLod(calcMinScale(painter->transform())))
+    {
+        paintComponent(painter, sceneRect);
+    }
     for (Component* child : children)
     {
         child->paint(painter, sceneRect);
@@ -231,6 +230,16 @@ void Component::deleteLater()
     }
 }
 
+void Component::init()
+{
+    if (!properties.contains(scaleKey()))
+        setScale(1.0);
+    if (!properties.contains(rotationKey()))
+        setRotation(0.0);
+    if (!properties.empty())
+        applyPreset();
+}
+
 void Component::paintComponent(QPainter* painter, const QRectF& sceneRect)
 {
     Q_UNUSED(sceneRect);
@@ -256,9 +265,9 @@ void Component::applyPreset()
 
 void Component::applyPreset(const QString& name)
 {
-    const auto& resourceManager = ResourceManager::instance();
+    auto resourceManager = ServiceManager::get<ResourceManager>();
 
-    const auto preset = resourceManager.getPreset(name);
+    const auto preset = resourceManager->getPreset(name);
     if (preset.empty())
         return;
 
@@ -300,6 +309,21 @@ void Component::prepareEvent(Event* event, const int elapsed)
             child->prepareEvent(event, elapsed);
         }
     }
+}
+
+bool Component::checkLod(const double scale)
+{
+    const double minScale = getMinScale();
+    if (!std::isnan(minScale) && scale < minScale)
+    {
+        return false;
+    }
+    const double maxScale = getMaxScale();
+    if (!std::isnan(maxScale) && scale > maxScale)
+    {
+        return false;
+    }
+    return true;
 }
 
 void Component::prepareEvents(const double time)

@@ -1,15 +1,15 @@
 #pragma once
 
+#include "service.h"
+
 #include <QHash>
 #include <QImage>
 #include <QString>
 #include <QVariantMap>
 
-class ResourceManager
+class ResourceManager : public Service
 {
 public:
-    static ResourceManager& instance();
-
     void addImage(const QString& alias, const QImage& image);
     QImage getImage(const QString& alias) const;
 
@@ -17,8 +17,6 @@ public:
     QVariantMap getPreset(const QString& name) const;
 
 private:
-    ResourceManager();
-
     QHash<QString,QImage> images;
     QHash<QString,QVariantMap> presets;
 };

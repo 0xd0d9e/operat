@@ -5,9 +5,13 @@
 class Sprite : public Component
 {
 public:
-    Sprite(Component* parent = nullptr, const QString& name = QString(), const QVariantMap& properties = QVariantMap());
+    DECLARE_CONSTRUCTOR(Sprite, Component)
 
     DECLARE_PROPERTY(QString, image, Image)
+    DECLARE_PROPERTY(QPointF, origin, Origin)
 
     void paintComponent(QPainter *painter, const QRectF &sceneRect) override;
+
+private:
+    QPointF calcOrigin(const QSizeF& size) const;
 };

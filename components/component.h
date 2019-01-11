@@ -27,7 +27,7 @@
     void on##Name##Changed(const Type&) {}
 
 #define DECLARE_CONSTRUCTOR(Type, Super) \
-    Type(Component* parent = nullptr, const QString& name = QString(), const QVariantMap& properties = QVariantMap()) : Super(parent, name, properties) {}
+    Type(Component* parent = nullptr, const QString& name = QString(), const QVariantMap& properties = QVariantMap()) : Super(parent, name, properties) {init();}
 
 class Event;
 
@@ -45,8 +45,10 @@ public:
 
     DECLARE_PROPERTY(QString, name, Name)
     DECLARE_PROPERTY(QPointF, pos, Pos)
-    DECLARE_PROPERTY(double, scale, Scale)
-    DECLARE_PROPERTY(double, rotation, Rotation)
+    DECLARE_PROPERTY_D(double, scale, Scale, 1.0)
+    DECLARE_PROPERTY_D(double, rotation, Rotation, 0.0)
+    DECLARE_PROPERTY(double, minScale, MinScale)
+    DECLARE_PROPERTY(double, maxScale, MaxScale)
 
     QVariantMap getProperties() const;
     void setProperties(const QVariantMap& properties);
@@ -96,6 +98,7 @@ public:
     void deleteLater();
 
 protected:
+    virtual void init();
     virtual void paintComponent(QPainter* painter, const QRectF& sceneRect);
 
     /// read and apply preset
@@ -106,6 +109,8 @@ protected:
     void applyPreset(const QVariantMap& preset);
     /// return true if event is complete
     virtual void prepareEvent(Event* event, const int elapsed);
+
+    bool checkLod(const double scale);
 
     QVariantMap properties;
 

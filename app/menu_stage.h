@@ -7,10 +7,10 @@
 class Button;
 class Camera;
 
-class MainMenuStage : public Stage
+class MenuStage : public Stage
 {
 public:
-    MainMenuStage();
+    MenuStage();
 
     void addButton(const QString& text, ButtonFunction function);
 

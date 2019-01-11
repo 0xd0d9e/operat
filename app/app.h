@@ -5,11 +5,11 @@
 
 #include <QObject>
 
-class Preview : public QObject
+class App : public QObject
 {
     Q_OBJECT
 public:
-    Preview();
+    App();
 
     void start();
 

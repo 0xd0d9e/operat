@@ -1,12 +1,11 @@
 #include "event.h"
 
-#include <unordered_map>
-
 #include <QEvent>
+#include <QHash>
 
 inline Event::Type getEventType(QEvent* event)
 {
-    static std::unordered_map<QEvent::Type, Event::Type> eventMap =
+    const QHash<QEvent::Type, Event::Type> eventMap =
     {
         {QEvent::MouseButtonPress, Event::MousePress},
         {QEvent::MouseButtonRelease, Event::MouseRelease},
@@ -15,8 +14,6 @@ inline Event::Type getEventType(QEvent* event)
         {QEvent::KeyRelease, Event::KeyRelease},
         {QEvent::Wheel, Event::Wheel},
     };
-
-
     return eventMap[event->type()];
 }
 
