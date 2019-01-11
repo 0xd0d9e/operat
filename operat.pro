@@ -86,7 +86,5 @@ HEADERS += \
     app/level.h
 
 RESOURCES += \
-    resources.qrc
+    resources/resources.qrc
 
-DISTFILES += \
-    resources.json
