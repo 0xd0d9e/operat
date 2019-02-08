@@ -28,8 +28,9 @@ public:
     };
 
     explicit Event(const int type);
-    explicit Event(QEvent* event);
     virtual ~Event() = default;
+
+    virtual bool isInputEvent() const;
 
     int getType() const;
 
@@ -42,3 +43,5 @@ protected:
 private:
     const int type;
 };
+
+Event::Type getEventType(QEvent* event);

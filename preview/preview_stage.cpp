@@ -8,19 +8,19 @@
 #include "components/sprite.h"
 #include "events/key_event.h"
 
-PreviewStage::PreviewStage(std::function<void ()> escapeFunction) : escapeFunction(escapeFunction)
+PreviewStage::PreviewStage()
 {
-    camera = scene.create<Camera>("camera", {{"viewRect", QRectF(-400, -300, 800, 600)}});
-    camera->setScene(&scene);
+    camera = updater.create<Camera>("camera", {{"viewRect", QRectF(-400, -300, 800, 600)}});
+    camera->setScene(&updater);
 
     const QSizeF mapSize(4072, 1765);
 
-    scene.addChild(this);
-    scene.addChild(&cameraControl);
-    Sprite* map = scene.create<Sprite>("worldMap", {{"image", "WorldMap"},
+    updater.addChild(this);
+    updater.addChild(&cameraControl);
+    Sprite* map = updater.create<Sprite>("worldMap", {{"image", "WorldMap"},
                                                     {"pos", QPointF(-mapSize.width()/2, -mapSize.height()/2)}});
-    scene.create<Grid>("grid", {{"size", 32}, {"pen", QPen(Qt::black)}});
-    scene.create<Persone>("ship");
+    updater.create<Grid>("grid", {{"size", 32}, {"pen", QPen(Qt::black)}});
+    updater.create<Persone>("ship");
 
     Component* overlay = new Component();
     camera->setOverlay(overlay);
@@ -30,7 +30,7 @@ PreviewStage::PreviewStage(std::function<void ()> escapeFunction) : escapeFuncti
     Camera* mapCamera = overlay->create<Camera>("worldCamera", {{"frameSize", QSizeF(width, width * aspect)},
                                                                 {"viewRect", QRectF(map->getPos(), mapSize)}});
 
-    mapCamera->setScene(&scene);
+    mapCamera->setScene(&updater);
     mapCamera->setKeepAspect(false);
     Display* display = overlay->create<Display>("mapDisplay", {{"pos", QPointF(10, 10)}});
     display->setCamera(mapCamera);
@@ -43,13 +43,13 @@ void PreviewStage::setViewport(Viewport* viewport)
     if (viewport)
         viewport->setCamera(camera);
 
-    scene.setEnabled(viewport != nullptr);
+    updater.setEnabled(viewport != nullptr);
 }
 
 void PreviewStage::keyRelease(KeyEvent* event)
 {
     if (event->getKey() == Qt::Key_Escape)
     {
-        escapeFunction();
+        emit escape();
     }
 }

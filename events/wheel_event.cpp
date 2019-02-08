@@ -3,7 +3,7 @@
 #include <QWheelEvent>
 
 WheelEvent::WheelEvent(QWheelEvent* event, const QPointF& scenePos)
-    : Event(Event::Wheel)
+    : InputEvent(Event::Wheel)
     , delta(event->delta())
     , scenePos(scenePos)
 {

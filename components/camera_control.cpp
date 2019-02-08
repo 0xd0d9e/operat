@@ -3,7 +3,7 @@
 #include "common/debug.h"
 #include "common/utils.h"
 #include "components/camera.h"
-#include "components/scene.h"
+#include "components/updater.h"
 #include "components/shape.h"
 #include "events/key_event.h"
 #include "events/mouse_event.h"

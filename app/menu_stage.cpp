@@ -3,7 +3,7 @@
 #include "common/debug.h"
 #include "components/button.h"
 #include "components/camera.h"
-#include "components/scene.h"
+#include "components/updater.h"
 #include "events/event.h"
 #include "events/invoke_event.h"
 #include "events/mouse_event.h"
@@ -11,12 +11,12 @@
 
 MenuStage::MenuStage()
 {
-    camera = scene.create<Camera>("menuCamera", {{"viewRect", QRectF(0, 0, 100, 100)},
-                                                 {"frameSize", QSizeF(100, 100)}});
-    camera->setScene(&scene);
+    camera = updater.create<Camera>("menuCamera", {{"viewRect", QRectF(0, 0, 100, 100)},
+                                                   {"frameSize", QSizeF(100, 100)}});
+    camera->setScene(&updater);
 }
 
-void MenuStage::addButton(const QString& text, ButtonFunction function)
+void MenuStage::addButton(const QString& text, SimpleFunction function)
 {
     if (height < margin)
         height = margin;
@@ -24,14 +24,13 @@ void MenuStage::addButton(const QString& text, ButtonFunction function)
     if (height > margin)
         height += spacing;
 
-    Button* button = scene.create<Button>(text, {{"preset", "menuButton"},
-                                                 {"text", text},
-                                                 {"function", toVariant(function)},
-                                                 {"pos", QPointF(margin, height)}});
+    Button* button = updater.create<Button>(text, {{"preset", "menuButton"},
+                                                   {"text", text},
+                                                   {"function", toVariant(function)},
+                                                   {"pos", QPointF(margin, height)}});
     const QRectF rect = button->getRect();
     width = std::max(rect.width(), width);
     height += rect.height();
-    buttons.push_back(button);
     camera->setViewRect({0, 0, width + margin * 2.0, height + margin});
 }
 
@@ -46,7 +45,7 @@ void MenuStage::setViewport(Viewport* newViewport)
     }
 
     viewport = newViewport;
-    scene.setEnabled(viewport != nullptr);
+    updater.setEnabled(viewport != nullptr);
 
     if (viewport)
     {

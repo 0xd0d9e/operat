@@ -1,12 +1,12 @@
 #pragma once
 
-#include "event.h"
+#include "input_event.h"
 
 #include <QPointF>
 
 class QWheelEvent;
 
-class WheelEvent : public Event
+class WheelEvent : public InputEvent
 {
 public:
     WheelEvent(QWheelEvent* event, const QPointF& scenePos);

@@ -3,13 +3,11 @@
 #include "stage_manager.h"
 #include "viewport.h"
 
-#include <QObject>
-
-class App : public QObject
+class Engine : public StageManager
 {
     Q_OBJECT
 public:
-    App();
+    Engine();
 
     void start();
 
@@ -17,5 +15,4 @@ private:
     void initResources();
 
     Viewport viewport;
-    StageManager stageManager;
 };

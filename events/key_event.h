@@ -1,10 +1,10 @@
 #pragma once
 
-#include "event.h"
+#include "input_event.h"
 
 class QKeyEvent;
 
-class KeyEvent : public Event
+class KeyEvent : public InputEvent
 {
 public:
     KeyEvent(QKeyEvent* event);

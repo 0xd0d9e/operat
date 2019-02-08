@@ -1,39 +1,27 @@
-#include "app.h"
+#include "engine.h"
 
 #include "common/style.h"
 #include "common/utils.h"
 #include "components/shape.h"
 #include "menu_stage.h"
-#include "preview/preview_stage.h"
 #include "resource_manager.h"
 #include "service_manager.h"
 
 #include <QApplication>
 
-App::App()
-    : stageManager(&viewport)
+Engine::Engine() : StageManager()
 {
     initResources();
-
-    MenuStage* mainMenuStage = new MenuStage();
-    PreviewStage* previewStage = new PreviewStage([this](){stageManager.setCurrentStage("MainMenu");});
-
-    stageManager.addStage("MainMenu", mainMenuStage);
-    stageManager.addStage("Preview", previewStage);
-
-    mainMenuStage->addButton(tr("Preview"), [this](){stageManager.setCurrentStage("Preview");});
-    mainMenuStage->addButton(tr("Exit"), [](){qApp->quit();});
-
-    stageManager.setCurrentStage("MainMenu");
+    setViewport(&viewport);
 }
 
-void App::start()
+void Engine::start()
 {
     viewport.show();
     viewport.resize(800, 600);
 }
 
-void App::initResources()
+void Engine::initResources()
 {
     auto resourceManager = ServiceManager::ask<ResourceManager>();
     resourceManager->addImage("WorldMap", QImage(":/assets/images/SimpleWMAuthaGraph.png"));

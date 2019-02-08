@@ -26,7 +26,6 @@ SOURCES += \
     components/grid.cpp \
     components/label.cpp \
     components/persone.cpp \
-    components/scene.cpp \
     components/shape.cpp \
     components/sprite.cpp \
     events/event_listener.cpp \
@@ -34,7 +33,6 @@ SOURCES += \
     components/camera_control.cpp \
     components/display.cpp \
     app/main.cpp \
-    app/app.cpp \
     app/resource_manager.cpp \
     app/message_service.cpp \
     app/service.cpp \
@@ -45,7 +43,15 @@ SOURCES += \
     app/stage.cpp \
     app/stage_manager.cpp \
     app/viewport.cpp \
-    app/level.cpp
+    grids/grids.cpp \
+    components/updater.cpp \
+    components/menu.cpp \
+    app/engine.cpp \
+    events/input_event.cpp \
+    events/event_condition.cpp \
+    events/event_watcher.cpp \
+    components/scene_manager.cpp \
+    components/scene.cpp
 
 HEADERS += \
     events/wheel_event.h \
@@ -55,7 +61,6 @@ HEADERS += \
     events/mouse_event.h \
     common/utils.h \
     common/style.h \
-    common/button_function.h \
     common/config.h \
     common/debug.h \
     common/default_value.h \
@@ -64,7 +69,6 @@ HEADERS += \
     components/camera.h \
     components/grid.h \
     components/persone.h \
-    components/scene.h \
     components/shape.h \
     components/sprite.h \
     components/label.h \
@@ -72,7 +76,6 @@ HEADERS += \
     components/button.h \
     components/camera_control.h \
     components/display.h \
-    app/app.h \
     app/resource_manager.h \
     app/store_service.h \
     app/service_manager.h \
@@ -83,7 +86,16 @@ HEADERS += \
     app/viewport.h \
     app/stage_manager.h \
     components/component.h \
-    app/level.h
+    grids/grids.h \
+    components/updater.h \
+    components/menu.h \
+    app/engine.h \
+    events/input_event.h \
+    events/event_condition.h \
+    events/event_watcher.h \
+    common/simple_function.h \
+    components/scene_manager.h \
+    components/scene.h
 
 RESOURCES += \
     resources/resources.qrc

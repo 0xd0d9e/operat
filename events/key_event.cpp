@@ -4,7 +4,7 @@
 
 
 KeyEvent::KeyEvent(QKeyEvent* event)
-    : Event(event)
+    : InputEvent(getEventType(event))
     , key(event->key())
     , modifiers(event->modifiers())
 {

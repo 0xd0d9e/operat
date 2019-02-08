@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/button_function.h"
+#include "common/simple_function.h"
 #include "events/event_listener.h"
 #include "label.h"
 
@@ -17,7 +17,7 @@ public:
     };
     DECLARE_CONSTRUCTOR(Button, Label)
 
-    DECLARE_PROPERTY(ButtonFunction, function, Function)
+    DECLARE_PROPERTY(SimpleFunction, function, Function)
     DECLARE_PROPERTY_D(int, state, State, NormalState)
 
     DECLARE_PROPERTY(Style, normalStyle, NormalStyle)

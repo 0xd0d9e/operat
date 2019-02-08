@@ -2,9 +2,13 @@
 
 #include "stage.h"
 
-StageManager::StageManager(Viewport* viewport)
-    : viewport(viewport)
+StageManager::StageManager()
 {
+}
+
+void StageManager::setViewport(Viewport* viewport)
+{
+    this->viewport = viewport;
 }
 
 Stage*StageManager::getCurrentStage() const

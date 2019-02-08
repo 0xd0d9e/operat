@@ -3,7 +3,7 @@
 #include <QMouseEvent>
 
 MouseEvent::MouseEvent(QMouseEvent* event, const QPointF& scenePos)
-    : Event(event)
+    : InputEvent(getEventType(event))
     , viewportPos(event->localPos())
     , scenePos(scenePos)
     , button(event->button())

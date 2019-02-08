@@ -45,6 +45,18 @@ void Component::setParent(Component* newParent)
         newParent->addChild(this);
 }
 
+QString Component::getPath() const
+{
+    return parent ? parent->getPath() + "." + getName()
+                  : getName();
+}
+
+bool Component::isVisible() const
+{
+    return parent ? isVisible() && parent->isVisible()
+                  : isVisible();
+}
+
 QVariantMap Component::getProperties() const
 {
     return properties;
@@ -91,12 +103,12 @@ Component* Component::getRoot()
                   : this;
 }
 
-Component* Component::operator [](const QString& name)
+Component* Component::operator [](const QString& name) const
 {
     return find(name);
 }
 
-Component* Component::find(const QString& name)
+Component* Component::find(const QString& name) const
 {
     auto iter = std::find_if(children.begin(), children.end(), [name](Component* component)
     {
@@ -138,6 +150,9 @@ void Component::update(const double time)
 
 void Component::paint(QPainter* painter, const QRectF& sceneRect)
 {
+    if (!getVisible())
+        return;
+
     flags |= PaintFlag;
     painter->save();
 
@@ -306,7 +321,8 @@ void Component::prepareEvent(Event* event, const int elapsed)
     {
         for (Component* child : children)
         {
-            child->prepareEvent(event, elapsed);
+            if (!event->isInputEvent() || (child->getVisible() && event->isInputEvent()))
+                child->prepareEvent(event, elapsed);
         }
     }
 }
@@ -333,7 +349,10 @@ void Component::prepareEvents(const double time)
     while (iter != events.end())
     {
         Event* event = *iter;
-        prepareEvent(event, elapsed);
+
+        if (!event->isInputEvent() || (getVisible() && event->isInputEvent()))
+            prepareEvent(event, elapsed);
+
         if (event->isComplete())
         {
             iter = events.erase(iter);

@@ -10,22 +10,27 @@
 #include <list>
 #include <functional>
 
+/// Declare property \a name (\a Name) of \a type with change handler \a onChange and default value of \a byDefault
 #define DECLARE_PROPERTY_CD(Type, name, Name, onChange, byDefault) \
     static const char* name##Key() { return #name; } \
     Type get##Name(const Type& defaultValue = byDefault) const { return properties.value(#name, QVariant::fromValue(defaultValue)).value< Type >(); } \
     void set##Name(const Type& value) { properties[#name] = QVariant::fromValue(value); onChange(value); }
 
+/// Declare property \a name (\a Name) of \a type with default value of \a byDefault
 #define DECLARE_PROPERTY_D(Type, name, Name, byDefault) \
     DECLARE_PROPERTY_CD(Type, name, Name, on##Name##Changed, byDefault) \
     void on##Name##Changed(const Type&) {}
 
+/// Declare property \a name (\a Name) of \a type with change handler \a onChange
 #define DECLARE_PROPERTY_C(Type, name, Name, onChange) \
     DECLARE_PROPERTY_CD(Type, name, Name, onChange, defaultValue<Type>())
 
+/// Declare property \a name (\a Name) of \a type
 #define DECLARE_PROPERTY(Type, name, Name) \
     DECLARE_PROPERTY_C(Type, name, Name, on##Name##Changed) \
     void on##Name##Changed(const Type&) {}
 
+/// Declare initialization constructor for \a Type with \a Super parent Component
 #define DECLARE_CONSTRUCTOR(Type, Super) \
     Type(Component* parent = nullptr, const QString& name = QString(), const QVariantMap& properties = QVariantMap()) : Super(parent, name, properties) {init();}
 
@@ -49,6 +54,10 @@ public:
     DECLARE_PROPERTY_D(double, rotation, Rotation, 0.0)
     DECLARE_PROPERTY(double, minScale, MinScale)
     DECLARE_PROPERTY(double, maxScale, MaxScale)
+    DECLARE_PROPERTY_D(bool, visible, Visible, true)
+
+    QString getPath() const;
+    bool isVisible() const;
 
     QVariantMap getProperties() const;
     void setProperties(const QVariantMap& properties);
@@ -59,8 +68,8 @@ public:
 
     Component* getRoot();
 
-    Component* operator [] (const QString& name);
-    Component* find(const QString& name);
+    Component* operator [] (const QString& name) const;
+    Component* find(const QString& name) const;
 
     virtual bool contains(const QRectF& sceneRect) const;
 
@@ -68,7 +77,7 @@ public:
     virtual void paint(QPainter* painter, const QRectF& sceneRect);
 
     template <typename Type>
-    Type* get(const QString& name);
+    Type* get(const QString& name) const;
 
     size_t getChildCount() const;
 
@@ -133,9 +142,9 @@ private:
 
 
 template <typename Type>
-Type* Component::get(const QString& name)
+Type* Component::get(const QString& name) const
 {
-    return reinterpret_cast<Type*>(operator [](name));
+    return reinterpret_cast<Type*>(find(name));
 }
 
 template <typename Function>

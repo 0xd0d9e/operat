@@ -1,12 +1,12 @@
 #pragma once
 
-#include "event.h"
+#include "input_event.h"
 
 #include <QPointF>
 
 class QMouseEvent;
 
-class MouseEvent : public Event
+class MouseEvent : public InputEvent
 {
 public:
     MouseEvent(QMouseEvent* event, const QPointF& scenePos);

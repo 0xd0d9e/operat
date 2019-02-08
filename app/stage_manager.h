@@ -2,20 +2,26 @@
 
 #include <QString>
 #include <QMap>
+#include <QObject>
 
 class Stage;
 class Viewport;
 
-class StageManager
+class StageManager : public QObject
 {
+    Q_OBJECT
 public:
-    StageManager(Viewport* viewport);
+    StageManager();
+
+    void setViewport(Viewport* viewport);
 
     Stage* getCurrentStage() const;
-    void setCurrentStage(const QString& name);
     void setCurrentStage(Stage* stage);
 
     void addStage(const QString& name, Stage* stage);
+
+public slots:
+    void setCurrentStage(const QString& name);
 
 private:
     QMap<QString, Stage*> stages;
