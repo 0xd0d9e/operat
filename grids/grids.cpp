@@ -34,8 +34,11 @@ GridsScene::GridsScene(GridsLogic* grids)
     create<Camera>("camera", {{"viewRect", QRectF(0, 0, 800, 600)}});
     cameraControl->setCamera(getCamera());
 
-    create<EventWatcher>()->addCondition(Event::KeyPress, new KeyEventCondition(Qt::Key_Escape),
-                                         [menu](){menu->setVisible(true);});
+    create<EventWatcher>()->addCondition(Event::KeyPress, new KeyEventCondition(Qt::Key_Escape), [menu](Event*)
+    {
+        menu->setVisible(true);
+        return true;
+    });
 
     create<Char>("char1", {{"pos", QPointF(100, 10)}});
     create<Char>("char2", {{"pos", QPointF(100, 100)}});
@@ -69,7 +72,7 @@ GridsStage::GridsStage()
     : mainScene(this)
     , menuScene(this)
 {
-    sceneManager.setScene(&menuScene);
+    sceneManager.setScene(&mainScene);
 }
 
 void GridsStage::setViewport(Viewport* viewport)

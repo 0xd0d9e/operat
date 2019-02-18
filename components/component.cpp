@@ -311,7 +311,7 @@ void Component::applyPreset(const QVariantMap& preset)
     }
 }
 
-void Component::prepareEvent(Event* event, const int elapsed)
+bool Component::prepareEvent(Event* event, const int elapsed)
 {
     if (event->getType() == Event::Invoke)
     {
@@ -322,9 +322,13 @@ void Component::prepareEvent(Event* event, const int elapsed)
         for (Component* child : children)
         {
             if (!event->isInputEvent() || (child->getVisible() && event->isInputEvent()))
-                child->prepareEvent(event, elapsed);
+            {
+                if (child->prepareEvent(event, elapsed))
+                    return true;
+            }
         }
     }
+    return false;
 }
 
 bool Component::checkLod(const double scale)

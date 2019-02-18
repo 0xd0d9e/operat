@@ -28,9 +28,9 @@ public:
 
     DECLARE_PREPARE_EVENT(Label)
 
-    void mousePress(MouseEvent *event);
-    void mouseMove(MouseEvent *event);
-    void mouseRelease(MouseEvent *event);
+    bool mousePress(MouseEvent *event) override;
+    bool mouseMove(MouseEvent *event) override;
+    bool mouseRelease(MouseEvent *event) override;
 
 private:
     bool pressed = false;

@@ -21,36 +21,41 @@ void Button::paintComponent(QPainter* painter, const QRectF& sceneRect)
     Label::paintComponent(painter, sceneRect);
 }
 
-void Button::mousePress(MouseEvent* event)
+bool Button::mousePress(MouseEvent* event)
 {
     if (event->getButton() != Qt::LeftButton)
-        return;
+        return false;
 
     if (!contains(QRectF(event->getScenePos(), QSizeF(1.0, 1.0))))
-        return;
+        return false;
 
     setState(PressedState);
     pressed = true;
+    return false;
 }
 
 
-void Button::mouseMove(MouseEvent* event)
+bool Button::mouseMove(MouseEvent* event)
 {
     if (!pressed)
     {
         const bool hover = contains(QRectF(event->getScenePos(), QSizeF(1.0, 1.0)));
         setState(hover ? HighlightState : NormalState);
     }
+    return false;
 }
 
-void Button::mouseRelease(MouseEvent* event)
+bool Button::mouseRelease(MouseEvent* event)
 {
     if (event->getButton() != Qt::LeftButton)
-        return;
+        return false;
 
-    if (getFunction() && pressed && contains(QRectF(event->getScenePos(), QSizeF(1.0, 1.0))))
-        getFunction()();
-
-    pressed = false;
-    setState(NormalState);
+    if (pressed && contains(QRectF(event->getScenePos(), QSizeF(1.0, 1.0))))
+    {
+        if (getFunction())
+            getFunction()();
+        pressed = false;
+        setState(NormalState);
+    }
+    return false;
 }

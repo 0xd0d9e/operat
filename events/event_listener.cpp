@@ -10,42 +10,58 @@ EventListener::EventListener()
 
 }
 
-void EventListener::onEvent(Event* event, const int elapsed)
+bool EventListener::onEvent(Event* event, const int elapsed)
 {
     Q_UNUSED(elapsed);
 
     switch (event->getType())
     {
-    case Event::MousePress:     mousePress(static_cast<MouseEvent*>(event));    break;
-    case Event::MouseMove:      mouseMove(static_cast<MouseEvent*>(event));     break;
-    case Event::MouseRelease:   mouseRelease(static_cast<MouseEvent*>(event));  break;
-    case Event::KeyPress:       keyPress(static_cast<KeyEvent*>(event));        break;
-    case Event::KeyRelease:     keyRelease(static_cast<KeyEvent*>(event));      break;
-    case Event::Wheel:          wheel(static_cast<WheelEvent*>(event));         break;
+    case Event::MousePress:     return mousePress(static_cast<MouseEvent*>(event));
+    case Event::MouseMove:      return mouseMove(static_cast<MouseEvent*>(event));
+    case Event::MouseRelease:   return mouseRelease(static_cast<MouseEvent*>(event));
+    case Event::KeyPress:       return keyPress(static_cast<KeyEvent*>(event));
+    case Event::KeyRelease:     return keyRelease(static_cast<KeyEvent*>(event));
+    case Event::Wheel:          return wheel(static_cast<WheelEvent*>(event));
     }
-    return;
+    return false;
 }
 
-void EventListener::mousePress(MouseEvent* )
+bool EventListener::mousePress(MouseEvent* )
 {
+    return false;
 }
 
-void EventListener::mouseMove(MouseEvent* )
+bool EventListener::mouseMove(MouseEvent* )
 {
+    return false;
 }
 
-void EventListener::mouseRelease(MouseEvent* )
+bool EventListener::mouseRelease(MouseEvent* )
 {
+    return false;
 }
 
-void EventListener::keyPress(KeyEvent* )
+bool EventListener::keyPress(KeyEvent* )
 {
+    return false;
 }
 
-void EventListener::keyRelease(KeyEvent* )
+bool EventListener::keyRelease(KeyEvent* )
 {
+    return false;
 }
 
-void EventListener::wheel(WheelEvent* )
+bool EventListener::wheel(WheelEvent* )
 {
+    return false;
+}
+
+bool EventListener::isEnabled() const
+{
+    return enabled;
+}
+
+void EventListener::setEnabled(const bool newEnabled)
+{
+    enabled = newEnabled;
 }

@@ -79,10 +79,10 @@ void CameraControl::pushLocation()
     history.push_front(getViewRect());
 }
 
-void CameraControl::mousePress(MouseEvent* event)
+bool CameraControl::mousePress(MouseEvent* event)
 {
     if (!camera)
-        return;
+        return false;
 
     if (event->getButtons() == Qt::LeftButton && event->getModifiers() == Qt::ControlModifier)
     {
@@ -109,12 +109,13 @@ void CameraControl::mousePress(MouseEvent* event)
         const QRectF targetRect = makeRect(viewRect.center(), camera->getFrameSize());
         setViewRect(targetRect, viewDuration);
     }
+    return false;
 }
 
-void CameraControl::mouseMove(MouseEvent* event)
+bool CameraControl::mouseMove(MouseEvent* event)
 {
     if (!camera)
-        return;
+        return false;
 
     if (event->getButtons() == Qt::LeftButton && event->getModifiers() == Qt::ControlModifier)
     {
@@ -129,12 +130,13 @@ void CameraControl::mouseMove(MouseEvent* event)
         transform.translate(diff.x() / scale.x(), diff.y() / scale.y());
         camera->setViewRect(transform.mapRect(pressRect));
     }
+    return false;
 }
 
-void CameraControl::mouseRelease(MouseEvent* event)
+bool CameraControl::mouseRelease(MouseEvent* event)
 {
     if (!camera)
-        return;
+        return false;
 
     Q_UNUSED(event);
     if (event->getButton() == Qt::LeftButton && event->getModifiers() == Qt::ControlModifier)
@@ -160,12 +162,13 @@ void CameraControl::mouseRelease(MouseEvent* event)
             popLocation(viewDuration);
         }
     }
+    return false;
 }
 
-void CameraControl::keyPress(KeyEvent* event)
+bool CameraControl::keyPress(KeyEvent* event)
 {
     if (!camera)
-        return;
+        return false;
 
     const int key = event->getKey();
     keys.insert(key);
@@ -190,20 +193,24 @@ void CameraControl::keyPress(KeyEvent* event)
 
     if (!rect.isNull())
         setViewRect(rect, viewDuration);
+    return false;
 }
 
-void CameraControl::keyRelease(KeyEvent* event)
+bool CameraControl::keyRelease(KeyEvent* event)
 {
     keys.remove(event->getKey());
+    return false;
 }
 
-void CameraControl::wheel(WheelEvent* event)
+bool CameraControl::wheel(WheelEvent* event)
 {
     if (!camera)
-        return;
+        return false;
 
     const double factor = event->getDelta() > 0 ? 0.8 : 1.2;
     zoom(factor, event->getScenePos(), zoomDuration);
+
+    return false;
 }
 
 void CameraControl::update(const double time)

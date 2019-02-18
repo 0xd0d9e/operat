@@ -27,7 +27,7 @@ signals:
 private:
     DECLARE_PREPARE_EVENT(Component)
 
-    void keyRelease(KeyEvent* event);
+    bool keyRelease(KeyEvent* event);
 
     Updater updater;
     Camera* camera;

@@ -36,14 +36,14 @@ public slots:
 private:
     DECLARE_PREPARE_EVENT(Component)
 
-    void mousePress(MouseEvent* event);
-    void mouseMove(MouseEvent* event);
-    void mouseRelease(MouseEvent* event);
+    bool mousePress(MouseEvent* event) override;
+    bool mouseMove(MouseEvent* event) override;
+    bool mouseRelease(MouseEvent* event) override;
 
-    void keyPress(KeyEvent* event);
-    void keyRelease(KeyEvent* event);
+    bool keyPress(KeyEvent* event) override;
+    bool keyRelease(KeyEvent* event) override;
 
-    void wheel(WheelEvent* event);
+    bool wheel(WheelEvent* event) override;
 
     void update(const double time) final;
 

@@ -2,27 +2,42 @@
 
 #include "event.h"
 
-void EventWatcher::addCondition(EventCondition* condition, SimpleFunction function)
+void EventWatcher::addCondition(EventCondition* condition, Function function)
 {
     addCondition(Event::NoEvent, condition, function);
 }
 
-void EventWatcher::addCondition(const int type, EventCondition* condition, SimpleFunction function)
+void EventWatcher::addCondition(const int type, EventCondition* condition, Function function)
 {
     actions[type].push_back(std::make_pair(condition, function));
 }
 
-void EventWatcher::prepareEvent(Event* event, const int elapsed)
+void EventWatcher::addAction(const int type, Function function)
 {
-    prepareEvent(Event::NoEvent, event);
-    prepareEvent(event->getType(), event);
+    actions[type].push_back(std::make_pair(nullptr, function));
 }
 
-void EventWatcher::prepareEvent(const int target, Event* event)
+bool EventWatcher::prepareEvent(Event* event, const int elapsed)
+{
+    Q_UNUSED(elapsed);
+
+    if (prepareEvent(Event::NoEvent, event))
+        return true;
+    if (prepareEvent(event->getType(), event))
+        return true;
+
+    return false;
+}
+
+bool EventWatcher::prepareEvent(const int target, Event* event)
 {
     for (Action action : actions[target])
     {
-        if (action.first->match(event))
-            action.second();
+        if (!action.first || action.first->match(event))
+        {
+            if (action.second(event))
+                return true;
+        }
     }
+    return false;
 }

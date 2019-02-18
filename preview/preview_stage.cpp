@@ -46,10 +46,11 @@ void PreviewStage::setViewport(Viewport* viewport)
     updater.setEnabled(viewport != nullptr);
 }
 
-void PreviewStage::keyRelease(KeyEvent* event)
+bool PreviewStage::keyRelease(KeyEvent* event)
 {
     if (event->getKey() == Qt::Key_Escape)
     {
         emit escape();
     }
+    return false;
 }

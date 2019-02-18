@@ -117,7 +117,7 @@ protected:
     /// copy properties from preset
     void applyPreset(const QVariantMap& preset);
     /// return true if event is complete
-    virtual void prepareEvent(Event* event, const int elapsed);
+    virtual bool prepareEvent(Event* event, const int elapsed);
 
     bool checkLod(const double scale);
 

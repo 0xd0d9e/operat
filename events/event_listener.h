@@ -12,17 +12,25 @@ class EventListener
 public:
     EventListener();
 
-    void onEvent(Event *event, const int elapsed);
+    bool onEvent(Event *event, const int elapsed);
 
-    virtual void mousePress(MouseEvent* event);
-    virtual void mouseMove(MouseEvent* event);
-    virtual void mouseRelease(MouseEvent* event);
+    virtual bool mousePress(MouseEvent* event);
+    virtual bool mouseMove(MouseEvent* event);
+    virtual bool mouseRelease(MouseEvent* event);
 
-    virtual void keyPress(KeyEvent* event);
-    virtual void keyRelease(KeyEvent* event);
+    virtual bool keyPress(KeyEvent* event);
+    virtual bool keyRelease(KeyEvent* event);
 
-    virtual void wheel(WheelEvent* event);
+    virtual bool wheel(WheelEvent* event);
+
+    bool isEnabled() const;
+    void setEnabled(const bool enabled);
+
+private:
+    bool enabled = true;
 };
 
-#define DECLARE_PREPARE_EVENT(Super) void prepareEvent(Event *event, const int elapsed) override \
-        { onEvent(event, elapsed); Super::prepareEvent(event, elapsed); }
+#define DECLARE_PREPARE_EVENT(Super) bool prepareEvent(Event *event, const int elapsed) override \
+        { if (!isEnabled()) return false; \
+          if (onEvent(event, elapsed)) return true; \
+          return Super::prepareEvent(event, elapsed); }
