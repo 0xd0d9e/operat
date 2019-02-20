@@ -11,6 +11,13 @@ void Camera::render(QPainter* painter, const QRectF& sceneRect)
     if (rendering)
         return;
 
+    if (focused)
+    {
+        QRectF viewRect = getViewRect();
+        viewRect.moveCenter(focused->getPos());
+        setViewRect(viewRect);
+    }
+
     const QSizeF frameSize = getFrameSize();
 
     if (frameSize.isNull())
@@ -155,4 +162,14 @@ void Camera::onFrameSizeChanged(const QSizeF& size)
 {
     frameBuffer = QPixmap(size.width(), size.height());
     frameBuffer.fill();
+}
+
+Component* Camera::getFocused() const
+{
+    return focused;
+}
+
+void Camera::setFocused(Component* value)
+{
+    focused = value;
 }

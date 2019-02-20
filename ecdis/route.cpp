@@ -2,6 +2,15 @@
 
 #include "common/geometry_math.h"
 
+inline double calcStartTurningDistance(const double inAngle, const double outAngle, const double turningRadius)
+{
+    // Угол поворота.
+    const double turnAngle = angleDiff(inAngle, outAngle);
+
+    // Длина между точкой начала циркуляции и до точки пересечения плеч.
+    return turningRadius * tan(turnAngle / 2.0);
+}
+
 void Route::addPoint(const QPointF& pos, const double width, const double speed)
 {
     if (points.empty())
@@ -21,11 +30,33 @@ void Route::addPoint(const QPointF& pos, const double width, const double speed)
         Segment segment;
         segment.boundingRect = QRectF(start.pos, end.pos);
         segment.index = point.index - 1;
-        segment.length = getDistance(start.pos, end.pos);
+        const QPointF diff = end.pos - start.pos;
+        segment.length = getLength(diff);
+        segment.dir = diff / segment.length;
+        segment.inPointL = start.pos + turnCcw(segment.dir) * start.width;
+        segment.inPointR = start.pos + turnCw(segment.dir) * start.width;
+        segment.outPointL = end.pos + turnCcw(segment.dir) * end.width;
+        segment.outPointR = end.pos + turnCw(segment.dir) * end.width;
+
         segment.straight = Straight::fromLine(start.pos, end.pos);
         segment.speed = start.speed;
+        segment.angle = getAngle(start.pos, end.pos);
+
+        if (!segments.empty())
+        {
+            Segment& prevSegment = segments.back();
+            prevSegment.turnDistance = calcStartTurningDistance(prevSegment.angle, segment.angle, start.turningRadius);
+            prevSegment.turnPoint = start.pos - prevSegment.dir * prevSegment.turnDistance;
+            prevSegment.turnStraight = segment.straight.parallel(prevSegment.turnPoint);
+        }
         segments.push_back(segment);
     }
+}
+
+void Route::clearPoints()
+{
+    points.clear();
+    segments.clear();
 }
 
 bool Route::contains(const QRectF& sceneRect) const
@@ -42,16 +73,25 @@ void Route::paintComponent(QPainter* painter, const QRectF& sceneRect)
 {
     Component::paintComponent(painter, sceneRect);
 
-
     for (const Segment& segment : segments)
     {
-        getLineStyle().apply(painter);
+        /*painter->setPen(QPen(Qt::red, 0, Qt::DotLine));
+        painter->setBrush(Qt::NoBrush);
+        painter->drawRect(segment.boundingRect);*/
 
+        getLineStyle().apply(painter);
         painter->drawLine(points[segment.index].pos, points[segment.index + 1].pos);
 
-        painter->setPen(QPen(Qt::red, 0, Qt::DotLine));
-        painter->setBrush(Qt::NoBrush);
-        painter->drawRect(segment.boundingRect);
+        if (!segment.turnPoint.isNull())
+        {
+            painter->setPen(QPen(Qt::green, 5));
+            painter->setBrush(Qt::NoBrush);
+            painter->drawPoint(segment.turnPoint);
+        }
+
+        painter->setPen(QPen(Qt::red, 0, Qt::DashLine));
+        painter->drawLine(segment.outPointL, segment.inPointL);
+        painter->drawLine(segment.outPointR, segment.inPointR);
     }
 
     const double radius = getPointRadius();
@@ -89,6 +129,11 @@ const Route::Segment&Route::getSegment(const int index) const
 int Route::getPointCount() const
 {
     return points.size();
+}
+
+int Route::getSegmentCount() const
+{
+    return segments.size();
 }
 
 const std::vector<Route::Point>& Route::getPoints() const

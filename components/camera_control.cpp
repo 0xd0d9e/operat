@@ -215,7 +215,7 @@ bool CameraControl::wheel(WheelEvent* event)
 
 void CameraControl::update(const double time)
 {
-    if (!camera)
+    if (!camera || !getKeyControl())
         return;
 
     QPointF vec;

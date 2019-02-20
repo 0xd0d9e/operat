@@ -35,6 +35,20 @@ struct Straight
         return pointAt(pos.x(), pos.y());
     }
 
+    /// \name Возвращает уравнение параллельной прямой проходящей через заданную точку
+    inline Straight parallel(const double x, const double y) const
+    {
+        Straight s;
+        s.b = y - k * x;
+        s.k = k;
+        return s;
+    }
+    inline Straight parallel(const QPointF& pos) const
+    {
+        return parallel(pos.x(), pos.y());
+    }
+    ///@}
+
     /// \name Уравнение прямой с угловым коэффициентом
     inline static Straight fromLine(const double x1, const double y1, const double x2, const double y2)
     {

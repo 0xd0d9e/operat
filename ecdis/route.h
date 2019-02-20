@@ -13,15 +13,34 @@ public:
         size_t index;
         double width;
         double speed;
+        double turningRadius = 50.0;
     };
     struct Segment
     {
         size_t index;
         QRectF boundingRect;
-        QPointF wolPoint;
         Straight straight;
+
+        /// Направляющий вектор
+        QPointF dir;
+        /// Длина
         double length;
+
         double speed;
+        /// направление сегмента (в радианах)
+        double angle;
+
+        /// Расстояние до начала входа в циркуляцию
+        double turnDistance;
+        /// Точка входа в циркуляцию
+        QPointF turnPoint;
+        /// Прямая параллельная след сегменту, проходящая через точку входа в циркуляцию
+        Straight turnStraight;
+
+        QPointF inPointL;
+        QPointF inPointR;
+        QPointF outPointL;
+        QPointF outPointR;
     };
 
     DECLARE_CONSTRUCTOR(Route, Component)
@@ -31,6 +50,7 @@ public:
     DECLARE_PROPERTY_D(double, pointRadius, PointRadius, 5.0)
 
     void addPoint(const QPointF& pos, const double width, const double speed);
+    void clearPoints();
 
     /// component api
     bool contains(const QRectF& sceneRect) const override;
@@ -40,6 +60,7 @@ public:
     const Segment& getSegment(const int index) const;
 
     int getPointCount() const;
+    int getSegmentCount() const;
 
     const std::vector<Point>& getPoints() const;
     const std::vector<Segment>& getSegments() const;

@@ -13,9 +13,16 @@ class VehicleControl
         , public EventListener
 {
 public:
+    enum Mode
+    {
+        SimpleMoving,
+        DirectionalMoving
+    };
     DECLARE_CONSTRUCTOR(VehicleControl, Component)
 
     DECLARE_PROPERTY_D(double, speed, Speed, 100.0)
+    DECLARE_PROPERTY_D(double, rotationSpeed, RotationSpeed, 3.0)
+    DECLARE_PROPERTY_D(int, mode, Mode, SimpleMoving)
 
     void setTarget(Component* target);
 
@@ -26,6 +33,9 @@ private:
     bool keyRelease(KeyEvent* event) override;
 
     void update(const double time) final;
+
+    void simpleMoving(const double time);
+    void directionalMoving(const double time);
 
     Component* target = nullptr;
     QSet<int> keys;

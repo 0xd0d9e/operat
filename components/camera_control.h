@@ -23,6 +23,8 @@ class CameraControl
 public:
     DECLARE_CONSTRUCTOR(CameraControl, Component)
 
+    DECLARE_PROPERTY_D(bool, keyControl, KeyControl, false)
+
     void setCamera(Camera* camera);
 
     QRectF getViewRect() const;

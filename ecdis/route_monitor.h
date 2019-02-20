@@ -7,6 +7,7 @@
 
 class Line;
 class Route;
+class Label;
 
 class RouteMonitor : public Component
 {
@@ -17,12 +18,14 @@ public:
 
     void setRoute(Route* route);
     void setShip(Component* ship);
+    void resetState();
 
     void update(const double time) final;
 
+    void setupUi(Component* ui);
+
 private:
     void init() final;
-    void initilizeVoyage();
 
     void onEnabledChanged(const bool enabled);
 
@@ -30,9 +33,16 @@ private:
     Component* ship;
 
     VoyageState state;
-    RouteCalculator* calculator;
+    RouteCalculator* calculator = nullptr;
 
+    Line* addTraverseLine;
     Line* traverseLine;
+
     Line* targetLine;
+
+    Line* nextTurnLine;
+    Line* turnLine;
+
+    Label* textLabel;
 };
 

@@ -58,7 +58,8 @@ SOURCES += \
     ecdis/route.cpp \
     components/vehicle_control.cpp \
     ecdis/route_monitor.cpp \
-    ecdis/route_calculator.cpp
+    ecdis/route_calculator.cpp \
+    ecdis/voyage_parameters.cpp
 
 HEADERS += \
     app/engine.h \
@@ -112,7 +113,8 @@ HEADERS += \
     ecdis/voyage_state.h \
     common/geometry_math.h \
     ecdis/route_calculator.h \
-    common/straight.h
+    common/straight.h \
+    ecdis/voyage_parameters.h
 
 RESOURCES += \
     resources/resources.qrc

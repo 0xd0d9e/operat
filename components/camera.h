@@ -30,6 +30,10 @@ public:
     void zoom(const double factor, const QPointF& scenePos);
 
     QPointF getScale() const;
+
+    Component* getFocused() const;
+    void setFocused(Component* value);
+
 private:
     void init() final;
     void updateTransform();
@@ -41,5 +45,6 @@ private:
     QTransform inverseTransform;
     Component* scene = nullptr;
     Component* overlay = nullptr;
+    Component* focused = nullptr;
     bool rendering = false;
 };

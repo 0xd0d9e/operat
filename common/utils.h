@@ -28,3 +28,24 @@ inline double calcMinScale(const QTransform& t)
     const double scaleY = sqrt(b*b + d*d);
     return std::min(scaleX, scaleY);
 }
+
+inline bool testFlag(const int flags, const int flag)
+{
+    return flags & flag;
+}
+
+inline void setFlag(int& flags, const int flag, const bool enabled)
+{
+    if (enabled == testFlag(flags, flag))
+        return;
+
+    if (enabled)
+        flags |= flag;
+    else
+        flags ^= flag;
+}
+
+inline void addFlag(int& flags, const int flag)
+{
+    setFlag(flags, flag, true);
+}
