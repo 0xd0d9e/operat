@@ -2,11 +2,8 @@
 
 #include "common/geometry_math.h"
 
-inline double calcStartTurningDistance(const double inAngle, const double outAngle, const double turningRadius)
+inline double calcStartTurningDistance(const double turnAngle, const double turningRadius)
 {
-    // Угол поворота.
-    const double turnAngle = angleDiff(inAngle, outAngle);
-
     // Длина между точкой начала циркуляции и до точки пересечения плеч.
     return turningRadius * tan(turnAngle / 2.0);
 }
@@ -45,8 +42,12 @@ void Route::addPoint(const QPointF& pos, const double width, const double speed)
         if (!segments.empty())
         {
             Segment& prevSegment = segments.back();
-            prevSegment.turnDistance = calcStartTurningDistance(prevSegment.angle, segment.angle, start.turningRadius);
-            prevSegment.turnPoint = start.pos - prevSegment.dir * prevSegment.turnDistance;
+
+            prevSegment.turnAngle = angleDiff(prevSegment.angle, segment.angle);
+            prevSegment.circulationDistance = calcStartTurningDistance(prevSegment.turnAngle, start.turningRadius);
+            prevSegment.turnDistance = prevSegment.circulationDistance + start.turnDeadDistance;
+            prevSegment.turnPoint = start.pos - prevSegment.dir * (prevSegment.turnDistance);
+            prevSegment.circulationPoint = start.pos - prevSegment.dir * (prevSegment.circulationDistance);
             prevSegment.turnStraight = segment.straight.parallel(prevSegment.turnPoint);
         }
         segments.push_back(segment);
@@ -75,23 +76,26 @@ void Route::paintComponent(QPainter* painter, const QRectF& sceneRect)
 
     for (const Segment& segment : segments)
     {
-        /*painter->setPen(QPen(Qt::red, 0, Qt::DotLine));
-        painter->setBrush(Qt::NoBrush);
-        painter->drawRect(segment.boundingRect);*/
-
         getLineStyle().apply(painter);
         painter->drawLine(points[segment.index].pos, points[segment.index + 1].pos);
 
         if (!segment.turnPoint.isNull())
         {
-            painter->setPen(QPen(Qt::green, 5));
+            painter->setPen(QPen(QColor("#aaaaffaa"), 3));
             painter->setBrush(Qt::NoBrush);
             painter->drawPoint(segment.turnPoint);
         }
+        if (!segment.circulationPoint.isNull())
+        {
+            painter->setPen(QPen(QColor("#aaaaffaa"), 3));
+            painter->setBrush(Qt::NoBrush);
+            painter->drawPoint(segment.circulationPoint);
+        }
 
-        painter->setPen(QPen(Qt::red, 0, Qt::DashLine));
+        painter->setPen(QPen(Qt::red, 1, Qt::DashLine));
         painter->drawLine(segment.outPointL, segment.inPointL);
         painter->drawLine(segment.outPointR, segment.inPointR);
+
     }
 
     const double radius = getPointRadius();
@@ -104,7 +108,7 @@ void Route::paintComponent(QPainter* painter, const QRectF& sceneRect)
         /// draw route width
         if (point.index != 0 && point.index != lastPoint)
         {
-            painter->setPen(QPen(Qt::black, 0));
+            painter->setPen(QPen(Qt::black, 1));
             painter->setBrush(Qt::NoBrush);
             const QPointF halfSize(point.width, point.width);
             painter->drawEllipse(QRectF(point.pos - halfSize, point.pos + halfSize));

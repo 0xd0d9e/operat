@@ -14,6 +14,7 @@ public:
         double width;
         double speed;
         double turningRadius = 50.0;
+        double turnDeadDistance = 15.0;
     };
     struct Segment
     {
@@ -26,16 +27,23 @@ public:
         /// Длина
         double length;
 
+        /// Скорость движения
         double speed;
         /// направление сегмента (в радианах)
         double angle;
 
-        /// Расстояние до начала входа в циркуляцию
+        /// Расстояние до точки начала поворота
         double turnDistance;
-        /// Точка входа в циркуляцию
+        /// Расстояние до начала входа в циркуляцию
+        double circulationDistance;
+        /// Точка начала поворота
         QPointF turnPoint;
+        /// Точка начала циркуляции
+        QPointF circulationPoint;
         /// Прямая параллельная след сегменту, проходящая через точку входа в циркуляцию
         Straight turnStraight;
+        /// Угол поворота
+        double turnAngle;
 
         QPointF inPointL;
         QPointF inPointR;

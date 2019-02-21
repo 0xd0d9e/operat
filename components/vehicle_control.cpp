@@ -42,6 +42,10 @@ void VehicleControl::update(const double time)
         directionalMoving(time);
         break;
 
+    default:
+        qDebug("Invalid mode");
+        break;
+
     }
 }
 

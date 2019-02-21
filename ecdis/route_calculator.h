@@ -15,6 +15,15 @@ public:
         OnTraverse = 4  ///< Судно на траверзе маршрута
     };
 
+    enum ChangeReason
+    {
+        NearFirstPointReason = 1,
+        NearCoursePointReason = 2,
+        NearLastPointReason = 4,
+        NoMorePointsReason = 8,
+        CrossWolReason = 16
+    };
+
     RouteCalculator(const Route& route, const VoyageState& state);
 
     int getCurrentPointIndex() const;
@@ -22,6 +31,7 @@ public:
     int getFlags() const;
 
     void updateCurrentPoint();
+    QList< QPair<int, int> > getCurrentPointIndexHistory() const;
 
 private:
     void updateOnRoute();
@@ -42,7 +52,8 @@ private:
     /// возвращает true если точка находиться на сегменте
     bool calcTraversePoint(const int segmentIndex, QPointF& pos) const;
 
-private:
+    void setCurrentPointIndex(const int index, const int reason);
+
     const Route& route;
     const VoyageState& state;
 
@@ -66,5 +77,7 @@ private:
 
     /// Признаки
     int flags = NoFlags;
+
+    QList< QPair<int, int> > currentPointIndexHistory;
 };
 

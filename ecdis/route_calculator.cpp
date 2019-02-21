@@ -49,15 +49,22 @@ void RouteCalculator::updateCurrentPoint()
 
         if (onTraverse)
         {
-            /// Если находимся на сегменте, то переключаемся на следующий
-            currentPointIndex = std::max(nearPointIndex + 1, currentPointIndex);
+            /// Определяем, лежит ли ближайшая точка в "своре" курса, если нет,
+            /// то пытаемся выбрать ближайшую по направлению к "створу" курса
+            const int nextPointIndex = findPointOnCourse(nearPointIndex);
+
+            /// Задаем ближайшую к створу точку как следующую, если она "старше" чем текущая
+            if (nextPointIndex > currentPointIndex || currentPointIndex < 0)
+            {
+                setCurrentPointIndex(nextPointIndex, NearCoursePointReason|NearFirstPointReason);
+            }
         }
         /// если это не первый запуск алгоритма, то меняем точку на первую, так как
         /// даже если мы уплыли обратно за первую точку, то вести всеравно должны в следующую
         else if (currentPointIndex < 0)
         {
             /// Если нет, то значит мы еще не доехали до начала маршрута
-            currentPointIndex = 0;
+            setCurrentPointIndex(0, NearFirstPointReason);
         }
     }
     /// Если мы находимся в районе последней точки
@@ -69,13 +76,13 @@ void RouteCalculator::updateCurrentPoint()
         if (onTraverse)
         {
             /// Если находимся, то следуем в последнюю точку
-            currentPointIndex = nearPointIndex;
+            setCurrentPointIndex(nearPointIndex, NearLastPointReason);
         }
         else
         {
             /// Если мы уже достигли последней точки, то устанавливаем соотв призpнак
             flags = EndOfRoute;
-            currentPointIndex = -1;
+            setCurrentPointIndex(-1, NoMorePointsReason|NearLastPointReason);
         }
     }
     /// Если мы находимся между первой и последней точкой
@@ -87,7 +94,7 @@ void RouteCalculator::updateCurrentPoint()
 
         /// Задаем ближайшую к створу точку как следующую, если она "старше" чем текущая
         if (nextPointIndex > currentPointIndex || currentPointIndex < 0)
-            currentPointIndex = nextPointIndex;
+            setCurrentPointIndex(nextPointIndex, NearCoursePointReason);
 
         /// Определяем току траверза
         const bool onTraverse = calcTraversePoint(std::max(currentPointIndex - 1, 0), traversePos);
@@ -115,10 +122,15 @@ void RouteCalculator::updateCurrentPoint()
             /// то переключаемся на следующий сегмент
             if (nextSegmentDistance < currentSegment.turnDistance)
             {
-                ++currentPointIndex;
+                setCurrentPointIndex(currentPointIndex + 1, CrossWolReason);
             }
         }
     }
+}
+
+QList<QPair<int, int> > RouteCalculator::getCurrentPointIndexHistory() const
+{
+    return currentPointIndexHistory;
 }
 
 void RouteCalculator::findNearPoint(int& index, double& minDistance) const
@@ -149,6 +161,10 @@ int RouteCalculator::findPointOnCourse(const int pointIndex) const
     if (fabs(nearCourseDiff) <= M_PI_2)
     {
         pointOnCourse = pointIndex;
+    }
+    else if (pointIndex == 0)
+    {
+        pointOnCourse = 1;
     }
     else
     {
@@ -183,4 +199,19 @@ bool RouteCalculator::calcTraversePoint(const int segmentIndex, QPointF& pos) co
     return segmentContains(route.getPoint(segmentIndex).pos,
                            route.getPoint(segmentIndex + 1).pos,
                            pos);
+}
+
+void RouteCalculator::setCurrentPointIndex(const int index, const int reason)
+{
+    if (currentPointIndex == index)
+    {
+        if (!currentPointIndexHistory.empty())
+        {
+            auto& lastRecord = currentPointIndexHistory.back();
+            setFlag(lastRecord.second, reason, true);
+        }
+        return;
+    }
+    currentPointIndex = index;
+    currentPointIndexHistory.push_back(qMakePair(index,reason));
 }

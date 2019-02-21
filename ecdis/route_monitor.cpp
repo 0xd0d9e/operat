@@ -18,6 +18,23 @@ inline QString calculatorFlagsToString(const int flags)
                          : names.join("|");
 }
 
+inline QString calculatorReasonToString(const int flags)
+{
+    QStringList names;
+    if (flags & RouteCalculator::NearFirstPointReason)
+        names << "NearFirstPointReason";
+    if (flags & RouteCalculator::NearCoursePointReason)
+        names << "NearCoursePointReason";
+    if (flags & RouteCalculator::NearLastPointReason)
+        names << "NearLastPointReason";
+    if (flags & RouteCalculator::NoMorePointsReason)
+        names << "NoMorePointsReason";
+    if (flags & RouteCalculator::CrossWolReason)
+        names << "CrossWolReason";
+    return names.empty() ? QString("Unexpected reason %1").arg(flags)
+                         : names.join("|");
+}
+
 void RouteMonitor::setRoute(Route* newRoute)
 {
     route = newRoute;
@@ -65,6 +82,17 @@ void RouteMonitor::update(const double time)
         traverseLine->setP1(state.pos);
         traverseLine->setP2(calculator->getTraversePos());
         traverseLine->setVisible(true);
+
+        if (!(calculator->getFlags() & RouteCalculator::OnTraverse))
+        {
+            addTraverseLine->setP1(calculator->getTraversePos());
+            addTraverseLine->setP2(route->getPoint(currentPointIndex).pos);
+            addTraverseLine->setVisible(true);
+        }
+        else
+        {
+            addTraverseLine->setVisible(false);
+        }
     }
     else
     {
@@ -102,6 +130,12 @@ void RouteMonitor::update(const double time)
     QStringList lines;
     lines << QString("currentPointIndex %1").arg(currentPointIndex);
     lines << QString("flags %1").arg(calculatorFlagsToString(calculator->getFlags()));
+
+    lines << "History:";
+    for (const auto& pair : calculator->getCurrentPointIndexHistory())
+    {
+        lines << "  " + QString::number(pair.first) + ": " + calculatorReasonToString(pair.second);
+    }
     textLabel->setText(lines.join("\n"));
 }
 
@@ -117,15 +151,16 @@ void RouteMonitor::init()
 {
     Component::init();
 
-    addTraverseLine = create<Line>("addTraverseLine", {{"pen", QPen(Qt::gray, 2, Qt::DotLine)}});
+    addTraverseLine = create<Line>("addTraverseLine", {{"pen", QPen(Qt::gray, 1, Qt::DotLine)}});
     addTraverseLine->setVisible(false);
-    traverseLine = create<Line>("traverse", {{"pen", QPen(Qt::gray, 2, Qt::DotLine)}});
+    traverseLine = create<Line>("traverse", {{"pen", QPen(Qt::gray, 1, Qt::DotLine)}});
     traverseLine->setVisible(false);
 
     targetLine = create<Line>("target", {{"pen", QPen(QColor("#33aa33"), 2, Qt::DotLine)}});
 
-    nextTurnLine = create<Line>("nextTurnLine", {{"pen", QPen(QColor("#3333aa"), 2, Qt::DotLine)}});
-    turnLine = create<Line>("turnLine", {{"pen", QPen(QColor("#3333aa"), 2, Qt::DotLine)}});
+    nextTurnLine = create<Line>("nextTurnLine", {{"pen", QPen(QColor("#3333aa"), 1, Qt::DotLine)}});
+    nextTurnLine->setVisible(false);
+    turnLine = create<Line>("turnLine", {{"pen", QPen(QColor("#3333aa"), 1, Qt::DotLine)}});
 }
 
 void RouteMonitor::onEnabledChanged(const bool enabled)
