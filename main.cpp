@@ -1,16 +1,7 @@
-#include "engine.h"
-
-#include "menu_stage.h"
-
-#include <preview/preview_stage.h>
-#include <grids/grids.h>
-#include <ecdis/ecdis_stage.h>
+#include "operat.h"
 
 #include <QApplication>
 #include <QVariant>
-
-
-
 
 int main(int argc, char *argv[])
 {
